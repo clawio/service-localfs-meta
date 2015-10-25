@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/clawio/service.localstore.meta/Godeps/_workspace/src/golang.org/x/net/context"
 	pb "github.com/clawio/service.localstore.meta/proto"
+	"golang.org/x/net/context"
 	"os"
 	"path"
 )

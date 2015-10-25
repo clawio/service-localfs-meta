@@ -34,10 +34,10 @@ package proto_test
 import (
 	"testing"
 
-	"github.com/clawio/service.localstore.meta/Godeps/_workspace/src/github.com/golang/protobuf/proto"
+	"github.com/golang/protobuf/proto"
 
-	proto3pb "github.com/clawio/service.localstore.meta/Godeps/_workspace/src/github.com/golang/protobuf/proto/proto3_proto"
-	pb "github.com/clawio/service.localstore.meta/Godeps/_workspace/src/github.com/golang/protobuf/proto/testdata"
+	proto3pb "github.com/golang/protobuf/proto/proto3_proto"
+	pb "github.com/golang/protobuf/proto/testdata"
 )
 
 var cloneTestMessage = &pb.MyMessage{

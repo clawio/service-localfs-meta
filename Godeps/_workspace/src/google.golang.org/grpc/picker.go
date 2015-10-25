@@ -36,8 +36,8 @@ package grpc
 import (
 	"time"
 
-	"github.com/clawio/service.localstore.meta/Godeps/_workspace/src/golang.org/x/net/context"
-	"github.com/clawio/service.localstore.meta/Godeps/_workspace/src/google.golang.org/grpc/transport"
+	"golang.org/x/net/context"
+	"google.golang.org/grpc/transport"
 )
 
 // Picker picks a Conn for RPC requests.

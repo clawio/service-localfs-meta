@@ -44,8 +44,8 @@ import (
 	"testing"
 	"time"
 
-	. "github.com/clawio/service.localstore.meta/Godeps/_workspace/src/github.com/golang/protobuf/proto"
-	. "github.com/clawio/service.localstore.meta/Godeps/_workspace/src/github.com/golang/protobuf/proto/testdata"
+	. "github.com/golang/protobuf/proto"
+	. "github.com/golang/protobuf/proto/testdata"
 )
 
 var globalO *Buffer

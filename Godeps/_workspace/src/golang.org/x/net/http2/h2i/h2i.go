@@ -33,9 +33,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/clawio/service.localstore.meta/Godeps/_workspace/src/golang.org/x/net/http2"
-	"github.com/clawio/service.localstore.meta/Godeps/_workspace/src/golang.org/x/net/http2/hpack"
 	"golang.org/x/crypto/ssh/terminal"
+	"golang.org/x/net/http2"
+	"golang.org/x/net/http2/hpack"
 )
 
 // Flags

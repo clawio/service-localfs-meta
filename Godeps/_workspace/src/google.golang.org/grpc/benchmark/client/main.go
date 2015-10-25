@@ -9,12 +9,12 @@ import (
 	"sync"
 	"time"
 
-	"github.com/clawio/service.localstore.meta/Godeps/_workspace/src/golang.org/x/net/context"
-	"github.com/clawio/service.localstore.meta/Godeps/_workspace/src/google.golang.org/grpc"
-	"github.com/clawio/service.localstore.meta/Godeps/_workspace/src/google.golang.org/grpc/benchmark"
-	testpb "github.com/clawio/service.localstore.meta/Godeps/_workspace/src/google.golang.org/grpc/benchmark/grpc_testing"
-	"github.com/clawio/service.localstore.meta/Godeps/_workspace/src/google.golang.org/grpc/benchmark/stats"
-	"github.com/clawio/service.localstore.meta/Godeps/_workspace/src/google.golang.org/grpc/grpclog"
+	"golang.org/x/net/context"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/benchmark"
+	testpb "google.golang.org/grpc/benchmark/grpc_testing"
+	"google.golang.org/grpc/benchmark/stats"
+	"google.golang.org/grpc/grpclog"
 )
 
 var (

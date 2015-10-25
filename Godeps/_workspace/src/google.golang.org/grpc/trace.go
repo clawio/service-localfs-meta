@@ -41,7 +41,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/clawio/service.localstore.meta/Godeps/_workspace/src/golang.org/x/net/trace"
+	"golang.org/x/net/trace"
 )
 
 // EnableTracing controls whether to trace RPCs using the golang.org/x/net/trace package.

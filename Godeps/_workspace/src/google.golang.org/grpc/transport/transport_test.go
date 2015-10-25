@@ -44,9 +44,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/clawio/service.localstore.meta/Godeps/_workspace/src/golang.org/x/net/context"
-	"github.com/clawio/service.localstore.meta/Godeps/_workspace/src/golang.org/x/net/http2"
-	"github.com/clawio/service.localstore.meta/Godeps/_workspace/src/google.golang.org/grpc/codes"
+	"golang.org/x/net/context"
+	"golang.org/x/net/http2"
+	"google.golang.org/grpc/codes"
 )
 
 type server struct {

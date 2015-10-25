@@ -77,8 +77,8 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/clawio/service.localstore.meta/Godeps/_workspace/src/golang.org/x/net/context"
-	"github.com/clawio/service.localstore.meta/Godeps/_workspace/src/golang.org/x/net/internal/timeseries"
+	"golang.org/x/net/context"
+	"golang.org/x/net/internal/timeseries"
 )
 
 // DebugUseAfterFinish controls whether to debug uses of Trace values after finishing.

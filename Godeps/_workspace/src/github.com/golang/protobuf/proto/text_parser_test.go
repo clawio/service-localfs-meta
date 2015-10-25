@@ -36,9 +36,9 @@ import (
 	"reflect"
 	"testing"
 
-	. "github.com/clawio/service.localstore.meta/Godeps/_workspace/src/github.com/golang/protobuf/proto"
-	proto3pb "github.com/clawio/service.localstore.meta/Godeps/_workspace/src/github.com/golang/protobuf/proto/proto3_proto"
-	. "github.com/clawio/service.localstore.meta/Godeps/_workspace/src/github.com/golang/protobuf/proto/testdata"
+	. "github.com/golang/protobuf/proto"
+	proto3pb "github.com/golang/protobuf/proto/proto3_proto"
+	. "github.com/golang/protobuf/proto/testdata"
 )
 
 type UnmarshalTextTest struct {

@@ -36,7 +36,7 @@
 package naming
 
 import (
-	"github.com/clawio/service.localstore.meta/Godeps/_workspace/src/golang.org/x/net/context"
+	"golang.org/x/net/context"
 )
 
 // Operation defines the corresponding operations for a name resolution change.

@@ -37,8 +37,8 @@ Package glogger defines glog-based logging for grpc.
 package glogger
 
 import (
-	"github.com/clawio/service.localstore.meta/Godeps/_workspace/src/google.golang.org/grpc/grpclog"
 	"github.com/golang/glog"
+	"google.golang.org/grpc/grpclog"
 )
 
 func init() {

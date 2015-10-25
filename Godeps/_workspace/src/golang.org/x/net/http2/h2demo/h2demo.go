@@ -29,7 +29,7 @@ import (
 
 	"camlistore.org/pkg/googlestorage"
 	"camlistore.org/pkg/singleflight"
-	"github.com/clawio/service.localstore.meta/Godeps/_workspace/src/golang.org/x/net/http2"
+	"golang.org/x/net/http2"
 )
 
 var (

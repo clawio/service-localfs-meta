@@ -39,11 +39,11 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/clawio/service.localstore.meta/Godeps/_workspace/src/github.com/golang/protobuf/proto"
-	"github.com/clawio/service.localstore.meta/Godeps/_workspace/src/golang.org/x/net/context"
-	"github.com/clawio/service.localstore.meta/Godeps/_workspace/src/google.golang.org/grpc/codes"
-	perfpb "github.com/clawio/service.localstore.meta/Godeps/_workspace/src/google.golang.org/grpc/test/codec_perf"
-	"github.com/clawio/service.localstore.meta/Godeps/_workspace/src/google.golang.org/grpc/transport"
+	"github.com/golang/protobuf/proto"
+	"golang.org/x/net/context"
+	"google.golang.org/grpc/codes"
+	perfpb "google.golang.org/grpc/test/codec_perf"
+	"google.golang.org/grpc/transport"
 )
 
 func TestSimpleParsing(t *testing.T) {

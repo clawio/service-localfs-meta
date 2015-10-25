@@ -41,12 +41,12 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/clawio/service.localstore.meta/Godeps/_workspace/src/github.com/golang/protobuf/proto"
-	"github.com/clawio/service.localstore.meta/Godeps/_workspace/src/golang.org/x/net/context"
-	"github.com/clawio/service.localstore.meta/Godeps/_workspace/src/google.golang.org/grpc"
-	"github.com/clawio/service.localstore.meta/Godeps/_workspace/src/google.golang.org/grpc/credentials"
-	"github.com/clawio/service.localstore.meta/Godeps/_workspace/src/google.golang.org/grpc/grpclog"
-	testpb "github.com/clawio/service.localstore.meta/Godeps/_workspace/src/google.golang.org/grpc/interop/grpc_testing"
+	"github.com/golang/protobuf/proto"
+	"golang.org/x/net/context"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/grpclog"
+	testpb "google.golang.org/grpc/interop/grpc_testing"
 )
 
 var (

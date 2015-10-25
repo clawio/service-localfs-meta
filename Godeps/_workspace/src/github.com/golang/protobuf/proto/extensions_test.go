@@ -36,8 +36,8 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/clawio/service.localstore.meta/Godeps/_workspace/src/github.com/golang/protobuf/proto"
-	pb "github.com/clawio/service.localstore.meta/Godeps/_workspace/src/github.com/golang/protobuf/proto/testdata"
+	"github.com/golang/protobuf/proto"
+	pb "github.com/golang/protobuf/proto/testdata"
 )
 
 func TestGetExtensionsWithMissingExtensions(t *testing.T) {

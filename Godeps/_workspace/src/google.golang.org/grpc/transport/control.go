@@ -37,7 +37,7 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/clawio/service.localstore.meta/Godeps/_workspace/src/golang.org/x/net/http2"
+	"golang.org/x/net/http2"
 )
 
 const (

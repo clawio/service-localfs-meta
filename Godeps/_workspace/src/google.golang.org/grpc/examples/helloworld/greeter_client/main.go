@@ -37,9 +37,9 @@ import (
 	"log"
 	"os"
 
-	"github.com/clawio/service.localstore.meta/Godeps/_workspace/src/golang.org/x/net/context"
-	"github.com/clawio/service.localstore.meta/Godeps/_workspace/src/google.golang.org/grpc"
-	pb "github.com/clawio/service.localstore.meta/Godeps/_workspace/src/google.golang.org/grpc/examples/helloworld/helloworld"
+	"golang.org/x/net/context"
+	"google.golang.org/grpc"
+	pb "google.golang.org/grpc/examples/helloworld/helloworld"
 )
 
 const (

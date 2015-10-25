@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/clawio/service.localstore.meta/Godeps/_workspace/src/golang.org/x/net/context"
+	"golang.org/x/net/context"
 )
 
 func ExampleWithTimeout() {

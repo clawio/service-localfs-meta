@@ -13,7 +13,7 @@ import (
 	"log"
 	"math"
 
-	"github.com/clawio/service.localstore.meta/Godeps/_workspace/src/golang.org/x/net/internal/timeseries"
+	"golang.org/x/net/internal/timeseries"
 )
 
 const (

@@ -36,9 +36,9 @@ package etcd
 import (
 	"sync"
 
-	"github.com/clawio/service.localstore.meta/Godeps/_workspace/src/golang.org/x/net/context"
-	"github.com/clawio/service.localstore.meta/Godeps/_workspace/src/google.golang.org/grpc/naming"
 	etcdcl "github.com/coreos/etcd/client"
+	"golang.org/x/net/context"
+	"google.golang.org/grpc/naming"
 )
 
 // getNode builds the key-value map starting from node recursively. It returns the

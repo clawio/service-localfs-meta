@@ -45,15 +45,15 @@ import (
 	"testing"
 	"time"
 
-	"github.com/clawio/service.localstore.meta/Godeps/_workspace/src/github.com/golang/protobuf/proto"
-	"github.com/clawio/service.localstore.meta/Godeps/_workspace/src/golang.org/x/net/context"
-	"github.com/clawio/service.localstore.meta/Godeps/_workspace/src/google.golang.org/grpc"
-	"github.com/clawio/service.localstore.meta/Godeps/_workspace/src/google.golang.org/grpc/codes"
-	"github.com/clawio/service.localstore.meta/Godeps/_workspace/src/google.golang.org/grpc/credentials"
-	"github.com/clawio/service.localstore.meta/Godeps/_workspace/src/google.golang.org/grpc/health"
-	healthpb "github.com/clawio/service.localstore.meta/Godeps/_workspace/src/google.golang.org/grpc/health/grpc_health_v1alpha"
-	"github.com/clawio/service.localstore.meta/Godeps/_workspace/src/google.golang.org/grpc/metadata"
-	testpb "github.com/clawio/service.localstore.meta/Godeps/_workspace/src/google.golang.org/grpc/test/grpc_testing"
+	"github.com/golang/protobuf/proto"
+	"golang.org/x/net/context"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/health"
+	healthpb "google.golang.org/grpc/health/grpc_health_v1alpha"
+	"google.golang.org/grpc/metadata"
+	testpb "google.golang.org/grpc/test/grpc_testing"
 )
 
 var (
