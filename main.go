@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
+	"github.com/clawio/service.localstore.meta/Godeps/_workspace/src/google.golang.org/grpc"
 	pb "github.com/clawio/service.localstore.meta/proto"
-	"google.golang.org/grpc"
 	"log"
 	"net"
 	"os"
