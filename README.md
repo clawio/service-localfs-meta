@@ -8,7 +8,7 @@ It contains:
 
 The protobuf spec is this
 
-  
+```
   syntax = "proto3";
   
   package localstore;
@@ -76,5 +76,5 @@ The protobuf spec is this
       string email = 3;
       string display_name = 4;
   }
-
+```
 
