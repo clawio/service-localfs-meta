@@ -17,7 +17,6 @@ It has these top-level messages:
 	MkdirReq
 	StatReq
 	Metadata
-	Identity
 */
 package localstore
 
@@ -43,102 +42,60 @@ func (m *Void) String() string { return proto.CompactTextString(m) }
 func (*Void) ProtoMessage()    {}
 
 type RmReq struct {
-	Idt  *Identity `protobuf:"bytes,1,opt,name=idt" json:"idt,omitempty"`
-	Path string    `protobuf:"bytes,2,opt,name=path" json:"path,omitempty"`
+	AccessToken string `protobuf:"bytes,1,opt,name=access_token" json:"access_token,omitempty"`
+	Path        string `protobuf:"bytes,2,opt,name=path" json:"path,omitempty"`
 }
 
 func (m *RmReq) Reset()         { *m = RmReq{} }
 func (m *RmReq) String() string { return proto.CompactTextString(m) }
 func (*RmReq) ProtoMessage()    {}
 
-func (m *RmReq) GetIdt() *Identity {
-	if m != nil {
-		return m.Idt
-	}
-	return nil
-}
-
 type MvReq struct {
-	Idt *Identity `protobuf:"bytes,1,opt,name=idt" json:"idt,omitempty"`
-	Src string    `protobuf:"bytes,2,opt,name=src" json:"src,omitempty"`
-	Dst string    `protobuf:"bytes,3,opt,name=dst" json:"dst,omitempty"`
+	AccessToken string `protobuf:"bytes,1,opt,name=access_token" json:"access_token,omitempty"`
+	Src         string `protobuf:"bytes,2,opt,name=src" json:"src,omitempty"`
+	Dst         string `protobuf:"bytes,3,opt,name=dst" json:"dst,omitempty"`
 }
 
 func (m *MvReq) Reset()         { *m = MvReq{} }
 func (m *MvReq) String() string { return proto.CompactTextString(m) }
 func (*MvReq) ProtoMessage()    {}
 
-func (m *MvReq) GetIdt() *Identity {
-	if m != nil {
-		return m.Idt
-	}
-	return nil
-}
-
 type HomeReq struct {
-	Idt *Identity `protobuf:"bytes,1,opt,name=idt" json:"idt,omitempty"`
+	AccessToken string `protobuf:"bytes,1,opt,name=access_token" json:"access_token,omitempty"`
 }
 
 func (m *HomeReq) Reset()         { *m = HomeReq{} }
 func (m *HomeReq) String() string { return proto.CompactTextString(m) }
 func (*HomeReq) ProtoMessage()    {}
 
-func (m *HomeReq) GetIdt() *Identity {
-	if m != nil {
-		return m.Idt
-	}
-	return nil
-}
-
 type CpReq struct {
-	Idt *Identity `protobuf:"bytes,1,opt,name=idt" json:"idt,omitempty"`
-	Src string    `protobuf:"bytes,2,opt,name=src" json:"src,omitempty"`
-	Dst string    `protobuf:"bytes,3,opt,name=dst" json:"dst,omitempty"`
+	AccessToken string `protobuf:"bytes,1,opt,name=access_token" json:"access_token,omitempty"`
+	Src         string `protobuf:"bytes,2,opt,name=src" json:"src,omitempty"`
+	Dst         string `protobuf:"bytes,3,opt,name=dst" json:"dst,omitempty"`
 }
 
 func (m *CpReq) Reset()         { *m = CpReq{} }
 func (m *CpReq) String() string { return proto.CompactTextString(m) }
 func (*CpReq) ProtoMessage()    {}
 
-func (m *CpReq) GetIdt() *Identity {
-	if m != nil {
-		return m.Idt
-	}
-	return nil
-}
-
 type MkdirReq struct {
-	Idt  *Identity `protobuf:"bytes,1,opt,name=idt" json:"idt,omitempty"`
-	Path string    `protobuf:"bytes,2,opt,name=path" json:"path,omitempty"`
+	AccessToken string `protobuf:"bytes,1,opt,name=access_token" json:"access_token,omitempty"`
+	Path        string `protobuf:"bytes,2,opt,name=path" json:"path,omitempty"`
 }
 
 func (m *MkdirReq) Reset()         { *m = MkdirReq{} }
 func (m *MkdirReq) String() string { return proto.CompactTextString(m) }
 func (*MkdirReq) ProtoMessage()    {}
 
-func (m *MkdirReq) GetIdt() *Identity {
-	if m != nil {
-		return m.Idt
-	}
-	return nil
-}
-
 type StatReq struct {
-	Idt      *Identity `protobuf:"bytes,1,opt,name=idt" json:"idt,omitempty"`
-	Path     string    `protobuf:"bytes,2,opt,name=path" json:"path,omitempty"`
-	Children bool      `protobuf:"varint,3,opt,name=children" json:"children,omitempty"`
+	AccessToken string `protobuf:"bytes,1,opt,name=access_token" json:"access_token,omitempty"`
+	Path        string `protobuf:"bytes,2,opt,name=path" json:"path,omitempty"`
+	Children    bool   `protobuf:"varint,3,opt,name=children" json:"children,omitempty"`
 }
 
 func (m *StatReq) Reset()         { *m = StatReq{} }
 func (m *StatReq) String() string { return proto.CompactTextString(m) }
 func (*StatReq) ProtoMessage()    {}
-
-func (m *StatReq) GetIdt() *Identity {
-	if m != nil {
-		return m.Idt
-	}
-	return nil
-}
 
 type Metadata struct {
 	Id          string      `protobuf:"bytes,1,opt,name=id" json:"id,omitempty"`
@@ -163,17 +120,6 @@ func (m *Metadata) GetChildren() []*Metadata {
 	}
 	return nil
 }
-
-type Identity struct {
-	Pid         string `protobuf:"bytes,1,opt,name=pid" json:"pid,omitempty"`
-	Idp         string `protobuf:"bytes,2,opt,name=idp" json:"idp,omitempty"`
-	Email       string `protobuf:"bytes,3,opt,name=email" json:"email,omitempty"`
-	DisplayName string `protobuf:"bytes,4,opt,name=display_name" json:"display_name,omitempty"`
-}
-
-func (m *Identity) Reset()         { *m = Identity{} }
-func (m *Identity) String() string { return proto.CompactTextString(m) }
-func (*Identity) ProtoMessage()    {}
 
 // Reference imports to suppress errors if they are not otherwise used.
 var _ context.Context

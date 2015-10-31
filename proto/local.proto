@@ -15,33 +15,33 @@ message Void {
 }
 
 message RmReq {
-    Identity idt = 1;
+    string access_token = 1;
     string path = 2;
 }
 
 message MvReq {
-    Identity idt = 1;
+    string access_token = 1;
     string src = 2;
     string dst = 3;
 }
 
 message HomeReq {
-    Identity idt = 1;    
+    string access_token = 1;    
 }
 
 message CpReq {
-    Identity idt = 1;
+    string access_token = 1;
     string src = 2;
     string dst = 3;
 }
 
 message MkdirReq {
-    Identity idt = 1;
+    string access_token = 1;
     string path = 2;
 }
 
 message StatReq {
-    Identity idt = 1;
+    string access_token = 1;
     string path = 2;
     bool children = 3;
 }
@@ -57,12 +57,5 @@ message Metadata {
     string etag = 8; 
     uint32 permissions = 9;
     repeated Metadata children = 10;
-} 
-
-message Identity {
-    string pid = 1;
-    string idp = 2;
-    string email = 3;
-    string display_name = 4;
 }
 

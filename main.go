@@ -11,16 +11,18 @@ import (
 )
 
 const (
-	serviceID    = "CLAWIO_LOCALSTORE"
-	dataDirEnvar = serviceID + "_DATADIR"
-	tmpDirEnvar  = serviceID + "_TMPDIR"
-	portEnvar    = serviceID + "_PORT"
+	serviceID         = "CLAWIO_LOCALSTOREMETA"
+	dataDirEnvar      = serviceID + "_DATADIR"
+	tmpDirEnvar       = serviceID + "_TMPDIR"
+	portEnvar         = serviceID + "_PORT"
+	sharedSecretEnvar = "CLAWIO_SHAREDSECRET"
 )
 
 type environ struct {
-	dataDir string
-	tmpDir  string
-	port    int
+	dataDir      string
+	tmpDir       string
+	port         int
+	sharedSecret string
 }
 
 func getEnviron() (*environ, error) {
@@ -32,12 +34,14 @@ func getEnviron() (*environ, error) {
 		return nil, err
 	}
 	e.port = port
+	e.sharedSecret = os.Getenv(sharedSecretEnvar)
 	return e, nil
 }
 func printEnviron(e *environ) {
 	log.Printf("%s=%s", dataDirEnvar, e.dataDir)
 	log.Printf("%s=%s", tmpDirEnvar, e.tmpDir)
 	log.Printf("%s=%d", portEnvar, e.port)
+	log.Printf("%s=%s", sharedSecretEnvar, "******")
 }
 func main() {
 	log.Printf("Service %s started", serviceID)
@@ -52,6 +56,7 @@ func main() {
 	p := &newServerParams{}
 	p.dataDir = env.dataDir
 	p.tmpDir = env.tmpDir
+	p.sharedSecret = env.sharedSecret
 
 	srv := newServer(p)
 

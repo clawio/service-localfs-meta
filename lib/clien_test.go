@@ -15,6 +15,7 @@ const Addr = "localhost:57001"
 
 func Test(t *testing.T) { TestingT(t) }
 
+/*
 type S struct {
 	c   *Client
 	idt *pb.Identity
@@ -233,3 +234,4 @@ func (s *S) TestRm(c *C) {
 		c.Fatal(err)
 	}
 }
+*/

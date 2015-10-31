@@ -1,8 +1,11 @@
 package main
 
 import (
+	"github.com/clawio/service.auth/lib"
 	pb "github.com/clawio/service.localstore.meta/proto"
 	"golang.org/x/net/context"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
 	"os"
 	"path"
 )
@@ -11,9 +14,14 @@ const (
 	dirPerm = 0755
 )
 
+var (
+	unauthenticatedError = grpc.Errorf(codes.Unauthenticated, "identity not found")
+)
+
 type newServerParams struct {
-	dataDir string
-	tmpDir  string
+	dataDir      string
+	tmpDir       string
+	sharedSecret string
 }
 
 func newServer(p *newServerParams) *server {
@@ -24,13 +32,19 @@ type server struct {
 	p *newServerParams
 }
 
-func (s *server) getHome(idt *pb.Identity) string {
+func (s *server) getHome(idt *lib.Identity) string {
 	return path.Join(s.p.dataDir, path.Join(idt.Pid))
 }
 
 func (s *server) Home(ctx context.Context, req *pb.HomeReq) (*pb.Void, error) {
-	home := s.getHome(req.Idt)
-	_, err := os.Stat(home)
+
+	idt, err := lib.ParseToken(req.AccessToken, s.p.sharedSecret)
+	if err != nil {
+		return &pb.Void{}, unauthenticatedError
+	}
+
+	home := s.getHome(idt)
+	_, err = os.Stat(home)
 
 	// Create home dir if not exists
 	if os.IsNotExist(err) {
@@ -49,16 +63,28 @@ func (s *server) Home(ctx context.Context, req *pb.HomeReq) (*pb.Void, error) {
 }
 
 func (s *server) Mkdir(ctx context.Context, req *pb.MkdirReq) (*pb.Void, error) {
-	p := path.Join(s.getHome(req.Idt), path.Clean(req.Path))
+
+	idt, err := lib.ParseToken(req.AccessToken, s.p.sharedSecret)
+	if err != nil {
+		return &pb.Void{}, unauthenticatedError
+	}
+
+	p := path.Join(s.getHome(idt), path.Clean(req.Path))
 	return &pb.Void{}, os.Mkdir(p, dirPerm)
 }
 
 func (s *server) Stat(ctx context.Context, req *pb.StatReq) (*pb.Metadata, error) {
-	p := path.Join(s.getHome(req.Idt), path.Clean(req.Path))
+
+	idt, err := lib.ParseToken(req.AccessToken, s.p.sharedSecret)
+	if err != nil {
+		return &pb.Metadata{}, unauthenticatedError
+	}
+
+	p := path.Join(s.getHome(idt), path.Clean(req.Path))
 
 	finfo, err := os.Stat(p)
 	if err != nil {
-		return nil, err
+		return &pb.Metadata{}, err
 	}
 
 	m := &pb.Metadata{}
@@ -74,11 +100,17 @@ func (s *server) Stat(ctx context.Context, req *pb.StatReq) (*pb.Metadata, error
 }
 
 func (s *server) Cp(ctx context.Context, req *pb.CpReq) (*pb.Void, error) {
-	src := path.Join(s.getHome(req.Idt), path.Clean(req.Src))
-	dst := path.Join(s.getHome(req.Idt), path.Clean(req.Dst))
+
+	idt, err := lib.ParseToken(req.AccessToken, s.p.sharedSecret)
+	if err != nil {
+		return &pb.Void{}, unauthenticatedError
+	}
+
+	src := path.Join(s.getHome(idt), path.Clean(req.Src))
+	dst := path.Join(s.getHome(idt), path.Clean(req.Dst))
 
 	statReq := &pb.StatReq{}
-	statReq.Idt = req.Idt
+	statReq.AccessToken = req.AccessToken
 	statReq.Path = req.Src
 
 	meta, err := s.Stat(ctx, statReq)
@@ -94,14 +126,26 @@ func (s *server) Cp(ctx context.Context, req *pb.CpReq) (*pb.Void, error) {
 }
 
 func (s *server) Mv(ctx context.Context, req *pb.MvReq) (*pb.Void, error) {
-	src := path.Join(s.getHome(req.Idt), path.Clean(req.Src))
-	dst := path.Join(s.getHome(req.Idt), path.Clean(req.Dst))
+
+	idt, err := lib.ParseToken(req.AccessToken, s.p.sharedSecret)
+	if err != nil {
+		return &pb.Void{}, unauthenticatedError
+	}
+
+	src := path.Join(s.getHome(idt), path.Clean(req.Src))
+	dst := path.Join(s.getHome(idt), path.Clean(req.Dst))
 
 	return &pb.Void{}, os.Rename(src, dst)
 }
 
 func (s *server) Rm(ctx context.Context, req *pb.RmReq) (*pb.Void, error) {
-	p := path.Join(s.getHome(req.Idt), path.Clean(req.Path))
+
+	idt, err := lib.ParseToken(req.AccessToken, s.p.sharedSecret)
+	if err != nil {
+		return &pb.Void{}, unauthenticatedError
+	}
+
+	p := path.Join(s.getHome(idt), path.Clean(req.Path))
 
 	return &pb.Void{}, os.Remove(p)
 }
