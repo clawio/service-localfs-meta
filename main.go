@@ -47,11 +47,11 @@ func main() {
 	log.Printf("Service %s started", serviceID)
 
 	env, err := getEnviron()
-	printEnviron(env)
-
 	if err != nil {
 		log.Fatal(err)
 	}
+	
+	printEnviron(env)
 
 	p := &newServerParams{}
 	p.dataDir = env.dataDir
