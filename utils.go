@@ -24,6 +24,10 @@ func (s *server) getMeta(p string) (*pb.Metadata, error) {
 	m.Permissions = 0
 	m.MimeType = mime.TypeByExtension(path.Ext(m.Path))
 
+	if m.MimeType == "" {
+		m.MimeType = "application/octet-stream"
+	}
+
 	return m, nil
 }
 
