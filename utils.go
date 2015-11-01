@@ -3,6 +3,7 @@ package main
 import (
 	pb "github.com/clawio/service.localstore.meta/proto"
 	"io"
+	"mime"
 	"os"
 	"path"
 )
@@ -21,6 +22,7 @@ func (s *server) getMeta(p string) (*pb.Metadata, error) {
 	m.Modified = uint32(finfo.ModTime().Unix())
 	m.Etag = "TODO"
 	m.Permissions = 0
+	m.MimeType = mime.TypeByExtension(path.Ext(m.Path))
 
 	return m, nil
 }
