@@ -113,7 +113,7 @@ func (s *server) Stat(ctx context.Context, req *pb.StatReq) (*pb.Metadata, error
 
 	for _, n := range names {
 
-		m, err := s.getMeta(n)
+		m, err := s.getMeta(path.Join(parentMeta.Path, path.Clean(n)))
 		if err != nil {
 			log.Error(err)
 		}
