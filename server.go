@@ -6,7 +6,6 @@ import (
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
-	"log"
 	"os"
 	"path"
 )
@@ -41,6 +40,7 @@ func (s *server) Home(ctx context.Context, req *pb.HomeReq) (*pb.Void, error) {
 
 	idt, err := lib.ParseToken(req.AccessToken, s.p.sharedSecret)
 	if err != nil {
+		log.Error(err)
 		return &pb.Void{}, unauthenticatedError
 	}
 
@@ -51,12 +51,14 @@ func (s *server) Home(ctx context.Context, req *pb.HomeReq) (*pb.Void, error) {
 	if os.IsNotExist(err) {
 		err = os.Mkdir(home, dirPerm)
 		if err != nil {
+			log.Error(err)
 			return nil, err
 		}
 		return &pb.Void{}, nil
 	}
 
 	if err != nil {
+		log.Error(err)
 		return nil, err
 	}
 
@@ -67,6 +69,7 @@ func (s *server) Mkdir(ctx context.Context, req *pb.MkdirReq) (*pb.Void, error) 
 
 	idt, err := lib.ParseToken(req.AccessToken, s.p.sharedSecret)
 	if err != nil {
+		log.Error(err)
 		return &pb.Void{}, unauthenticatedError
 	}
 
@@ -78,6 +81,7 @@ func (s *server) Stat(ctx context.Context, req *pb.StatReq) (*pb.Metadata, error
 
 	idt, err := lib.ParseToken(req.AccessToken, s.p.sharedSecret)
 	if err != nil {
+		log.Error(err)
 		return &pb.Metadata{}, unauthenticatedError
 	}
 
@@ -85,6 +89,7 @@ func (s *server) Stat(ctx context.Context, req *pb.StatReq) (*pb.Metadata, error
 
 	parentMeta, err := s.getMeta(p)
 	if err != nil {
+		log.Error(err)
 		return &pb.Metadata{}, err
 	}
 
@@ -94,6 +99,7 @@ func (s *server) Stat(ctx context.Context, req *pb.StatReq) (*pb.Metadata, error
 
 	dir, err := os.Open(p)
 	if err != nil {
+		log.Error(err)
 		return &pb.Metadata{}, err
 	}
 
@@ -101,6 +107,7 @@ func (s *server) Stat(ctx context.Context, req *pb.StatReq) (*pb.Metadata, error
 
 	names, err := dir.Readdirnames(0)
 	if err != nil {
+		log.Error(err)
 		return &pb.Metadata{}, err
 	}
 
@@ -108,7 +115,7 @@ func (s *server) Stat(ctx context.Context, req *pb.StatReq) (*pb.Metadata, error
 
 		m, err := s.getMeta(n)
 		if err != nil {
-			log.Print(err)
+			log.Error(err)
 		}
 
 		parentMeta.Children = append(parentMeta.Children, m)
@@ -121,6 +128,7 @@ func (s *server) Cp(ctx context.Context, req *pb.CpReq) (*pb.Void, error) {
 
 	idt, err := lib.ParseToken(req.AccessToken, s.p.sharedSecret)
 	if err != nil {
+		log.Error(err)
 		return &pb.Void{}, unauthenticatedError
 	}
 
@@ -133,6 +141,7 @@ func (s *server) Cp(ctx context.Context, req *pb.CpReq) (*pb.Void, error) {
 
 	meta, err := s.Stat(ctx, statReq)
 	if err != nil {
+		log.Error(err)
 		return &pb.Void{}, err
 	}
 
@@ -147,6 +156,7 @@ func (s *server) Mv(ctx context.Context, req *pb.MvReq) (*pb.Void, error) {
 
 	idt, err := lib.ParseToken(req.AccessToken, s.p.sharedSecret)
 	if err != nil {
+		log.Error(err)
 		return &pb.Void{}, unauthenticatedError
 	}
 
@@ -160,6 +170,7 @@ func (s *server) Rm(ctx context.Context, req *pb.RmReq) (*pb.Void, error) {
 
 	idt, err := lib.ParseToken(req.AccessToken, s.p.sharedSecret)
 	if err != nil {
+		log.Error(err)
 		return &pb.Void{}, unauthenticatedError
 	}
 
