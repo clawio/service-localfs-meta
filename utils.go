@@ -1,10 +1,29 @@
 package main
 
 import (
+	pb "github.com/clawio/service.localstore.meta/proto"
 	"io"
 	"os"
 	"path"
 )
+
+func (s *server) getMeta(p string) (*pb.Metadata, error) {
+	finfo, err := os.Stat(p)
+	if err != nil {
+		return &pb.Metadata{}, err
+	}
+
+	m := &pb.Metadata{}
+	m.Id = "TODO"
+	m.Path = path.Clean(p)
+	m.Size = uint32(finfo.Size())
+	m.IsContainer = finfo.IsDir()
+	m.Modified = uint32(finfo.ModTime().Unix())
+	m.Etag = "TODO"
+	m.Permissions = 0
+
+	return m, nil
+}
 
 func copyFile(src, dst string, size int64) (err error) {
 	reader, err := os.Open(src)

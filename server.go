@@ -6,6 +6,7 @@ import (
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
+	"log"
 	"os"
 	"path"
 )
@@ -82,21 +83,38 @@ func (s *server) Stat(ctx context.Context, req *pb.StatReq) (*pb.Metadata, error
 
 	p := path.Join(s.getHome(idt), path.Clean(req.Path))
 
-	finfo, err := os.Stat(p)
+	parentMeta, err := s.getMeta(p)
 	if err != nil {
 		return &pb.Metadata{}, err
 	}
 
-	m := &pb.Metadata{}
-	m.Id = "TODO"
-	m.Path = path.Clean(p)
-	m.Size = uint32(finfo.Size())
-	m.IsContainer = finfo.IsDir()
-	m.Modified = uint32(finfo.ModTime().Unix())
-	m.Etag = "TODO"
-	m.Permissions = 0
+	if !parentMeta.IsContainer || req.Children == false {
+		return parentMeta, nil
+	}
 
-	return m, nil
+	dir, err := os.Open(p)
+	if err != nil {
+		return &pb.Metadata{}, err
+	}
+
+	defer dir.Close()
+
+	names, err := dir.Readdirnames(0)
+	if err != nil {
+		return &pb.Metadata{}, err
+	}
+
+	for _, n := range names {
+
+		m, err := s.getMeta(n)
+		if err != nil {
+			log.Print(err)
+		}
+
+		parentMeta.Children = append(parentMeta.Children, m)
+	}
+
+	return parentMeta, nil
 }
 
 func (s *server) Cp(ctx context.Context, req *pb.CpReq) (*pb.Void, error) {
