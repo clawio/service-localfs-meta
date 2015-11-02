@@ -9,6 +9,7 @@ import (
 )
 
 func (s *server) getMeta(p string) (*pb.Metadata, error) {
+
 	finfo, err := os.Stat(p)
 	if err != nil {
 		return &pb.Metadata{}, err
@@ -28,10 +29,15 @@ func (s *server) getMeta(p string) (*pb.Metadata, error) {
 		m.MimeType = "application/octet-stream"
 	}
 
+	if m.IsContainer {
+		m.MimeType = "inode/container"
+	}
+
 	return m, nil
 }
 
 func copyFile(src, dst string, size int64) (err error) {
+
 	reader, err := os.Open(src)
 	if err != nil {
 		return err
