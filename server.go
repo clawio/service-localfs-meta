@@ -74,6 +74,10 @@ func (s *server) Mkdir(ctx context.Context, req *pb.MkdirReq) (*pb.Void, error) 
 	}
 
 	p := path.Join(s.getHome(idt), path.Clean(req.Path))
+	if p == s.getHome(idt) {
+		return &pb.Void{}, grpc.Errorf(codes.PermissionDenied, "cannot remove home directory")
+	}
+
 	return &pb.Void{}, os.Mkdir(p, dirPerm)
 }
 
@@ -135,6 +139,10 @@ func (s *server) Cp(ctx context.Context, req *pb.CpReq) (*pb.Void, error) {
 	src := path.Join(s.getHome(idt), path.Clean(req.Src))
 	dst := path.Join(s.getHome(idt), path.Clean(req.Dst))
 
+	if src == s.getHome(idt) || dst == s.getHome(idt) {
+		return &pb.Void{}, grpc.Errorf(codes.PermissionDenied, "cannot copy from/to home directory")
+	}
+
 	statReq := &pb.StatReq{}
 	statReq.AccessToken = req.AccessToken
 	statReq.Path = req.Src
@@ -163,6 +171,10 @@ func (s *server) Mv(ctx context.Context, req *pb.MvReq) (*pb.Void, error) {
 	src := path.Join(s.getHome(idt), path.Clean(req.Src))
 	dst := path.Join(s.getHome(idt), path.Clean(req.Dst))
 
+	if src == s.getHome(idt) || dst == s.getHome(idt) {
+		return &pb.Void{}, grpc.Errorf(codes.PermissionDenied, "cannot copy from/to home directory")
+	}
+
 	return &pb.Void{}, os.Rename(src, dst)
 }
 
@@ -175,6 +187,9 @@ func (s *server) Rm(ctx context.Context, req *pb.RmReq) (*pb.Void, error) {
 	}
 
 	p := path.Join(s.getHome(idt), path.Clean(req.Path))
+	if p == s.getHome(idt) {
+		return &pb.Void{}, grpc.Errorf(codes.PermissionDenied, "cannot remove home directory")
+	}
 
 	return &pb.Void{}, os.Remove(p)
 }
