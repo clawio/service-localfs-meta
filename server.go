@@ -59,7 +59,7 @@ func (s *server) Home(ctx context.Context, req *pb.HomeReq) (*pb.Void, error) {
 
 		log.Infof("home does not exist")
 
-		err = os.Mkdir(home, dirPerm)
+		err = os.Mkdir(pp, dirPerm)
 		if err != nil {
 			log.Error(err)
 			return nil, err
