@@ -1,41 +1,43 @@
 package main
 
 import (
-	pb "github.com/clawio/service.localstore.meta/proto"
+	"github.com/clawio/service.auth/lib"
 	"io"
-	"mime"
 	"os"
 	"path"
+	"strings"
 )
 
-func (s *server) getMeta(p string) (*pb.Metadata, error) {
+// getHome returns the user home directory.
+// the logical home has this layout.
+// local/users/<letter>/<pid>
+// Example: /local/users/o/ourense
+// idt.Pid must be always non-empty
+func getHome(idt *lib.Identity) string {
 
-	finfo, err := os.Stat(p)
-	if err != nil {
-		return &pb.Metadata{}, err
+	pid := path.Clean(idt.Pid)
+
+	if pid == "" {
+		panic("idt.Pid must not be empty")
 	}
 
-	m := &pb.Metadata{}
-	m.Id = "TODO"
-	m.Path = path.Clean(p)
-	m.Size = uint32(finfo.Size())
-	m.IsContainer = finfo.IsDir()
-	m.Modified = uint32(finfo.ModTime().Unix())
-	m.Etag = "TODO"
-	m.Permissions = 0
-	m.MimeType = mime.TypeByExtension(path.Ext(m.Path))
-
-	if m.MimeType == "" {
-		m.MimeType = "application/octet-stream"
-	}
-
-	if m.IsContainer {
-		m.MimeType = "inode/container"
-	}
-
-	return m, nil
+	return path.Join("local", "users", string(pid[0]), pid)
 }
 
+// isUnderHome checks is the path is under a user home dir or not.
+func isUnderHome(p string, idt *lib.Identity) bool {
+
+	p = path.Clean(p)
+
+	if strings.HasPrefix(p, getHome(idt)) {
+		return true
+	}
+
+	return false
+}
+
+// copyFile copies a file from src to dst.
+// src and dst are physycal paths.
 func copyFile(src, dst string, size int64) (err error) {
 
 	reader, err := os.Open(src)
@@ -57,6 +59,8 @@ func copyFile(src, dst string, size int64) (err error) {
 	return nil
 }
 
+// copyDir copies a dir from src to dst.
+// src and dst are physycal paths.
 func copyDir(src, dst string) (err error) {
 	err = os.Mkdir(dst, dirPerm)
 	if err != nil {

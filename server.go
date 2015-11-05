@@ -6,6 +6,7 @@ import (
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
+	"mime"
 	"os"
 	"path"
 )
@@ -16,6 +17,7 @@ const (
 
 var (
 	unauthenticatedError = grpc.Errorf(codes.Unauthenticated, "identity not found")
+	permissionDenied     = grpc.Errorf(codes.PermissionDenied, "access denied")
 )
 
 type newServerParams struct {
@@ -32,10 +34,6 @@ type server struct {
 	p *newServerParams
 }
 
-func (s *server) getHome(idt *lib.Identity) string {
-	return path.Join(s.p.dataDir, path.Join(idt.Pid))
-}
-
 func (s *server) Home(ctx context.Context, req *pb.HomeReq) (*pb.Void, error) {
 
 	idt, err := lib.ParseToken(req.AccessToken, s.p.sharedSecret)
@@ -44,16 +42,31 @@ func (s *server) Home(ctx context.Context, req *pb.HomeReq) (*pb.Void, error) {
 		return &pb.Void{}, unauthenticatedError
 	}
 
-	home := s.getHome(idt)
-	_, err = os.Stat(home)
+	log.Infof("%s", idt)
+
+	home := getHome(idt)
+
+	log.Infof("home is %s", home)
+
+	pp := s.getPhysicalPath(home)
+
+	log.Infof("physical path is %s", pp)
+
+	_, err = os.Stat(pp)
 
 	// Create home dir if not exists
 	if os.IsNotExist(err) {
+
+		log.Infof("home does not exist")
+
 		err = os.Mkdir(home, dirPerm)
 		if err != nil {
 			log.Error(err)
 			return nil, err
 		}
+
+		log.Infof("home created")
+
 		return &pb.Void{}, nil
 	}
 
@@ -61,6 +74,8 @@ func (s *server) Home(ctx context.Context, req *pb.HomeReq) (*pb.Void, error) {
 		log.Error(err)
 		return nil, err
 	}
+
+	log.Infof("home already created")
 
 	return &pb.Void{}, nil
 }
@@ -73,12 +88,33 @@ func (s *server) Mkdir(ctx context.Context, req *pb.MkdirReq) (*pb.Void, error) 
 		return &pb.Void{}, unauthenticatedError
 	}
 
-	p := path.Join(s.getHome(idt), path.Clean(req.Path))
-	if p == s.getHome(idt) {
+	log.Infof("%s", idt)
+
+	p := path.Clean(req.Path)
+
+	log.Infof("path is %s", p)
+
+	if !isUnderHome(p, idt) {
+		log.Error(permissionDenied)
+		return &pb.Void{}, permissionDenied
+	}
+
+	if p == getHome(idt) {
 		return &pb.Void{}, grpc.Errorf(codes.PermissionDenied, "cannot remove home directory")
 	}
 
-	return &pb.Void{}, os.Mkdir(p, dirPerm)
+	pp := s.getPhysicalPath(p)
+
+	log.Infof("physical path is %s", pp)
+
+	err = os.Mkdir(pp, dirPerm)
+	if err != nil {
+		return &pb.Void{}, err
+	}
+
+	log.Infof("created dir %s", pp)
+
+	return &pb.Void{}, nil
 }
 
 func (s *server) Stat(ctx context.Context, req *pb.StatReq) (*pb.Metadata, error) {
@@ -89,23 +125,40 @@ func (s *server) Stat(ctx context.Context, req *pb.StatReq) (*pb.Metadata, error
 		return &pb.Metadata{}, unauthenticatedError
 	}
 
-	p := path.Join(s.getHome(idt), path.Clean(req.Path))
+	log.Infof("%s", s)
 
-	parentMeta, err := s.getMeta(p)
+	p := path.Clean(req.Path)
+
+	log.Infof("path is %s", p)
+
+	if !isUnderHome(p, idt) {
+		log.Error(permissionDenied)
+		return &pb.Metadata{}, permissionDenied
+	}
+
+	pp := s.getPhysicalPath(p)
+
+	log.Infof("physical path is %s", pp)
+
+	parentMeta, err := s.getMeta(pp)
 	if err != nil {
 		log.Error(err)
 		return &pb.Metadata{}, err
 	}
+
+	log.Infof("stated %s", pp)
 
 	if !parentMeta.IsContainer || req.Children == false {
 		return parentMeta, nil
 	}
 
-	dir, err := os.Open(p)
+	dir, err := os.Open(pp)
 	if err != nil {
 		log.Error(err)
 		return &pb.Metadata{}, err
 	}
+
+	log.Infof("opened dir %s", pp)
 
 	defer dir.Close()
 
@@ -114,6 +167,8 @@ func (s *server) Stat(ctx context.Context, req *pb.StatReq) (*pb.Metadata, error
 		log.Error(err)
 		return &pb.Metadata{}, err
 	}
+
+	log.Infof("dir %s has %d entries", pp, len(names))
 
 	for _, n := range names {
 
@@ -124,6 +179,8 @@ func (s *server) Stat(ctx context.Context, req *pb.StatReq) (*pb.Metadata, error
 
 		parentMeta.Children = append(parentMeta.Children, m)
 	}
+
+	log.Infof("added %d entries to parent", len(parentMeta.Children))
 
 	return parentMeta, nil
 }
@@ -136,12 +193,33 @@ func (s *server) Cp(ctx context.Context, req *pb.CpReq) (*pb.Void, error) {
 		return &pb.Void{}, unauthenticatedError
 	}
 
-	src := path.Join(s.getHome(idt), path.Clean(req.Src))
-	dst := path.Join(s.getHome(idt), path.Clean(req.Dst))
+	log.Infof("%s", idt)
 
-	if src == s.getHome(idt) || dst == s.getHome(idt) {
+	src := path.Clean(req.Src)
+	dst := path.Clean(req.Dst)
+
+	log.Infof("src is %s", src)
+	log.Info("dst is %s", dst)
+
+	if !isUnderHome(src, idt) {
+		log.Error(permissionDenied)
+		return &pb.Void{}, permissionDenied
+	}
+
+	if !isUnderHome(dst, idt) {
+		log.Error(permissionDenied)
+		return &pb.Void{}, permissionDenied
+	}
+
+	if src == getHome(idt) || dst == getHome(idt) {
 		return &pb.Void{}, grpc.Errorf(codes.PermissionDenied, "cannot copy from/to home directory")
 	}
+
+	psrc := s.getPhysicalPath(src)
+	pdst := s.getPhysicalPath(dst)
+
+	log.Infof("physical src is %s", psrc)
+	log.Infof("physical dst is %s", pdst)
 
 	statReq := &pb.StatReq{}
 	statReq.AccessToken = req.AccessToken
@@ -153,11 +231,25 @@ func (s *server) Cp(ctx context.Context, req *pb.CpReq) (*pb.Void, error) {
 		return &pb.Void{}, err
 	}
 
+	log.Infof("stated %s", src)
+
 	if meta.IsContainer {
-		return &pb.Void{}, copyDir(src, dst)
+		err = copyDir(psrc, pdst)
+		if err != nil {
+			return &pb.Void{}, err
+		}
+
+		log.Infof("copied from dir %s to dir %s", psrc, pdst)
 	}
 
-	return &pb.Void{}, copyFile(src, dst, int64(meta.Size))
+	err = copyFile(psrc, pdst, int64(meta.Size))
+	if err != nil {
+		return &pb.Void{}, err
+	}
+
+	log.Infof("copied from file %s to file %s", psrc, pdst)
+
+	return &pb.Void{}, nil
 }
 
 func (s *server) Mv(ctx context.Context, req *pb.MvReq) (*pb.Void, error) {
@@ -168,14 +260,43 @@ func (s *server) Mv(ctx context.Context, req *pb.MvReq) (*pb.Void, error) {
 		return &pb.Void{}, unauthenticatedError
 	}
 
-	src := path.Join(s.getHome(idt), path.Clean(req.Src))
-	dst := path.Join(s.getHome(idt), path.Clean(req.Dst))
+	log.Infof("%s", idt)
 
-	if src == s.getHome(idt) || dst == s.getHome(idt) {
-		return &pb.Void{}, grpc.Errorf(codes.PermissionDenied, "cannot copy from/to home directory")
+	src := path.Clean(req.Src)
+	dst := path.Clean(req.Dst)
+
+	log.Infof("src is %s", src)
+	log.Info("dst is %s", dst)
+
+	if isUnderHome(src, idt) {
+		log.Error(permissionDenied)
+		return &pb.Void{}, permissionDenied
 	}
 
-	return &pb.Void{}, os.Rename(src, dst)
+	if !isUnderHome(dst, idt) {
+		log.Error(permissionDenied)
+		return &pb.Void{}, permissionDenied
+	}
+
+	if src == getHome(idt) || dst == getHome(idt) {
+		return &pb.Void{}, grpc.Errorf(codes.PermissionDenied, "cannot rename from/to home directory")
+	}
+
+	psrc := s.getPhysicalPath(src)
+	pdst := s.getPhysicalPath(dst)
+
+	log.Infof("physical src is %s", psrc)
+	log.Infof("physical dst is %s", pdst)
+
+	err = os.Rename(psrc, pdst)
+	if err != nil {
+		log.Error(err)
+		return &pb.Void{}, err
+	}
+
+	log.Infof("renamed from %s to %s", psrc, pdst)
+
+	return &pb.Void{}, nil
 }
 
 func (s *server) Rm(ctx context.Context, req *pb.RmReq) (*pb.Void, error) {
@@ -186,10 +307,65 @@ func (s *server) Rm(ctx context.Context, req *pb.RmReq) (*pb.Void, error) {
 		return &pb.Void{}, unauthenticatedError
 	}
 
-	p := path.Join(s.getHome(idt), path.Clean(req.Path))
-	if p == s.getHome(idt) {
+	log.Infof("%s", idt)
+
+	p := path.Clean(req.Path)
+
+	log.Infof("path is %s", p)
+
+	if !isUnderHome(p, idt) {
+		log.Error(permissionDenied)
+		return &pb.Void{}, permissionDenied
+	}
+
+	if p == getHome(idt) {
 		return &pb.Void{}, grpc.Errorf(codes.PermissionDenied, "cannot remove home directory")
 	}
 
-	return &pb.Void{}, os.Remove(p)
+	pp := s.getPhysicalPath(p)
+
+	log.Infof("physical path is %s", pp)
+
+	err = os.Remove(pp)
+	if err != nil {
+		log.Error(err)
+		return &pb.Void{}, err
+	}
+
+	log.Infof("removed %s", pp)
+
+	return &pb.Void{}, nil
+}
+
+// getMeta return the metadata of path p. p is the physical path.
+func (s *server) getMeta(p string) (*pb.Metadata, error) {
+
+	finfo, err := os.Stat(p)
+	if err != nil {
+		return &pb.Metadata{}, err
+	}
+
+	m := &pb.Metadata{}
+	m.Id = "TODO"
+	m.Path = path.Clean(p) // TODO return logical path
+	m.Size = uint32(finfo.Size())
+	m.IsContainer = finfo.IsDir()
+	m.Modified = uint32(finfo.ModTime().Unix())
+	m.Etag = "TODO"
+	m.Permissions = 0
+	m.MimeType = mime.TypeByExtension(path.Ext(m.Path))
+
+	if m.MimeType == "" {
+		m.MimeType = "application/octet-stream"
+	}
+
+	if m.IsContainer {
+		m.MimeType = "inode/container"
+	}
+
+	return m, nil
+}
+
+func (s *server) getPhysicalPath(p string) string {
+	return path.Join(s.p.dataDir, path.Clean(p))
 }
