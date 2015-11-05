@@ -21,7 +21,7 @@ func getHome(idt *lib.Identity) string {
 		panic("idt.Pid must not be empty")
 	}
 
-	return path.Join("local", "users", string(pid[0]), pid)
+	return path.Join("/local", "users", string(pid[0]), pid)
 }
 
 // isUnderHome checks is the path is under a user home dir or not.
