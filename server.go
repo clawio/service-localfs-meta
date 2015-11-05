@@ -100,7 +100,7 @@ func (s *server) Mkdir(ctx context.Context, req *pb.MkdirReq) (*pb.Void, error) 
 	}
 
 	if p == getHome(idt) {
-		return &pb.Void{}, grpc.Errorf(codes.PermissionDenied, "cannot remove home directory")
+		return &pb.Void{}, grpc.Errorf(codes.PermissionDenied, "cannot create directory")
 	}
 
 	pp := s.getPhysicalPath(p)
@@ -109,6 +109,7 @@ func (s *server) Mkdir(ctx context.Context, req *pb.MkdirReq) (*pb.Void, error) 
 
 	err = os.Mkdir(pp, dirPerm)
 	if err != nil {
+		log.Error(err)
 		return &pb.Void{}, err
 	}
 
