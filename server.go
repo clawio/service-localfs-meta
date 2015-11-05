@@ -9,6 +9,7 @@ import (
 	"mime"
 	"os"
 	"path"
+	"strings"
 )
 
 const (
@@ -338,17 +339,20 @@ func (s *server) Rm(ctx context.Context, req *pb.RmReq) (*pb.Void, error) {
 	return &pb.Void{}, nil
 }
 
-// getMeta return the metadata of path p. p is the physical path.
-func (s *server) getMeta(p string) (*pb.Metadata, error) {
+// getMeta return the metadata of path pp.
+// p is the physical path and should never be exposed to clients.
+func (s *server) getMeta(pp string) (*pb.Metadata, error) {
 
-	finfo, err := os.Stat(p)
+	finfo, err := os.Stat(pp)
 	if err != nil {
 		return &pb.Metadata{}, err
 	}
 
+	logicalPath := s.getLogicalPath(pp)
+
 	m := &pb.Metadata{}
 	m.Id = "TODO"
-	m.Path = path.Clean(p) // TODO return logical path
+	m.Path = logicalPath
 	m.Size = uint32(finfo.Size())
 	m.IsContainer = finfo.IsDir()
 	m.Modified = uint32(finfo.ModTime().Unix())
@@ -369,4 +373,8 @@ func (s *server) getMeta(p string) (*pb.Metadata, error) {
 
 func (s *server) getPhysicalPath(p string) string {
 	return path.Join(s.p.dataDir, path.Clean(p))
+}
+
+func (s *server) getLogicalPath(pp string) string {
+	return path.Clean(strings.TrimPrefix(pp, s.p.dataDir))
 }
