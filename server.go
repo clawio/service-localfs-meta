@@ -148,7 +148,7 @@ func (s *server) Stat(ctx context.Context, req *pb.StatReq) (*pb.Metadata, error
 		return &pb.Metadata{}, err
 	}
 
-	log.Infof("stated %s", pp)
+	log.Infof("stated parent %s", pp)
 
 	if !parentMeta.IsContainer || req.Children == false {
 		return parentMeta, nil
@@ -173,13 +173,14 @@ func (s *server) Stat(ctx context.Context, req *pb.StatReq) (*pb.Metadata, error
 	log.Infof("dir %s has %d entries", pp, len(names))
 
 	for _, n := range names {
-
-		m, err := s.getMeta(path.Join(parentMeta.Path, path.Clean(n)))
+		cpp := s.getPhysicalPath(path.Join(parentMeta.Path, path.Clean(n)))
+		m, err := s.getMeta(cpp)
 		if err != nil {
 			log.Error(err)
+		} else {
+			parentMeta.Children = append(parentMeta.Children, m)
 		}
 
-		parentMeta.Children = append(parentMeta.Children, m)
 	}
 
 	log.Infof("added %d entries to parent", len(parentMeta.Children))
