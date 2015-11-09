@@ -82,7 +82,7 @@ func main() {
 
 	env, err := getEnviron()
 	if err != nil {
-		log.Error(err)
+		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
 
@@ -98,7 +98,7 @@ func main() {
 
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", env.port))
 	if err != nil {
-		log.Error(err)
+		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
 
