@@ -7,10 +7,10 @@ ENV CLAWIO_LOCALSTOREMETA_PORT 57001
 ENV CLAWIO_LOCALSTOREMETA_PROP "service-localstore-prop"
 ENV CLAWIO_SHAREDSECRET secret
 
-ADD . /go/src/clawio/service.localstore.meta
+ADD . /go/src/github.com/clawio/service.localstore.meta
+WORKDIR /go/src/github.com/clawio/service.localstore.meta
 
 RUN go get -u github.com/tools/godep
-RUN cd /go/src/clawio/service.localstore.meta
 RUN godep restore
 RUN go install
 
