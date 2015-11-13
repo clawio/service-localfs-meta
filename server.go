@@ -212,10 +212,10 @@ func (s *server) Stat(ctx context.Context, req *pb.StatReq) (*pb.Metadata, error
 	in := &proppb.GetReq{}
 	in.Path = p
 	in.AccessToken = req.AccessToken
+	in.ForceCreation = true
 
 	rec, err := client.Get(ctx, in)
 	if err != nil {
-		//TODO(labkode) if record not found create it. Take closer look to home creation
 		log.Error(err)
 		return &pb.Metadata{}, err
 	}
@@ -257,11 +257,11 @@ func (s *server) Stat(ctx context.Context, req *pb.StatReq) (*pb.Metadata, error
 			in := &proppb.GetReq{}
 			in.Path = cp
 			in.AccessToken = req.AccessToken
+			in.ForceCreation = true
 
 			rec, err := client.Get(ctx, in)
 			if err != nil {
 				log.Errorf("path %s has not been added because %s", p, err.Error())
-				// ommit this record but not cancell the whole operation
 			} else {
 				m.Id = rec.Id
 				m.Etag = rec.Etag
