@@ -1,8 +1,9 @@
 package main
 
 import (
-	"github.com/clawio/service.auth/lib"
+	authlib "github.com/clawio/service.auth/lib"
 	pb "github.com/clawio/service.localstore.meta/proto"
+	proppb "github.com/clawio/service.localstore.prop/proto"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -36,10 +37,9 @@ type server struct {
 	p *newServerParams
 }
 
-// TODO(labkode) ask service.localstore.prop to propagate info.
 func (s *server) Home(ctx context.Context, req *pb.HomeReq) (*pb.Void, error) {
 
-	idt, err := lib.ParseToken(req.AccessToken, s.p.sharedSecret)
+	idt, err := authlib.ParseToken(req.AccessToken, s.p.sharedSecret)
 	if err != nil {
 		log.Error(err)
 		return &pb.Void{}, unauthenticatedError
@@ -65,7 +65,7 @@ func (s *server) Home(ctx context.Context, req *pb.HomeReq) (*pb.Void, error) {
 		err = os.MkdirAll(pp, dirPerm)
 		if err != nil {
 			log.Error(err)
-			return nil, err
+			return &pb.Void{}, err
 		}
 
 		log.Infof("home created")
@@ -75,18 +75,40 @@ func (s *server) Home(ctx context.Context, req *pb.HomeReq) (*pb.Void, error) {
 
 	if err != nil {
 		log.Error(err)
-		return nil, err
+		return &pb.Void{}, err
 	}
 
 	log.Infof("home already created")
 
+	con, err := grpc.Dial(s.p.prop, grpc.WithInsecure())
+	if err != nil {
+		log.Error(err)
+		return &pb.Void{}, err
+	}
+	defer con.Close()
+
+	log.Infof("created connection to prop")
+
+	client := proppb.NewPropClient(con)
+
+	in := &proppb.PutReq{}
+	in.Path = home
+	in.AccessToken = req.AccessToken
+
+	_, err = client.Put(ctx, in)
+	if err != nil {
+		log.Error(err)
+		return &pb.Void{}, err
+	}
+
+	log.Infof("home added to prop")
+
 	return &pb.Void{}, nil
 }
 
-//TODO(labkode) ask service.localstore.prop for put dir info
 func (s *server) Mkdir(ctx context.Context, req *pb.MkdirReq) (*pb.Void, error) {
 
-	idt, err := lib.ParseToken(req.AccessToken, s.p.sharedSecret)
+	idt, err := authlib.ParseToken(req.AccessToken, s.p.sharedSecret)
 	if err != nil {
 		log.Error(err)
 		return &pb.Void{}, unauthenticatedError
@@ -119,13 +141,35 @@ func (s *server) Mkdir(ctx context.Context, req *pb.MkdirReq) (*pb.Void, error) 
 
 	log.Infof("created dir %s", pp)
 
+	con, err := grpc.Dial(s.p.prop, grpc.WithInsecure())
+	if err != nil {
+		log.Error(err)
+		return &pb.Void{}, err
+	}
+	defer con.Close()
+
+	log.Infof("created connection to prop")
+
+	client := proppb.NewPropClient(con)
+
+	in := &proppb.PutReq{}
+	in.Path = p
+	in.AccessToken = req.AccessToken
+
+	_, err = client.Put(ctx, in)
+	if err != nil {
+		log.Error(err)
+		return &pb.Void{}, err
+	}
+
+	log.Infof("dir %s added to prop", p)
+
 	return &pb.Void{}, nil
 }
 
-// TODO(labkode) ask service.localstore.prop for propagation info
 func (s *server) Stat(ctx context.Context, req *pb.StatReq) (*pb.Metadata, error) {
 
-	idt, err := lib.ParseToken(req.AccessToken, s.p.sharedSecret)
+	idt, err := authlib.ParseToken(req.AccessToken, s.p.sharedSecret)
 	if err != nil {
 		log.Error(err)
 		return &pb.Metadata{}, unauthenticatedError
@@ -154,6 +198,33 @@ func (s *server) Stat(ctx context.Context, req *pb.StatReq) (*pb.Metadata, error
 
 	log.Infof("stated parent %s", pp)
 
+	con, err := grpc.Dial(s.p.prop, grpc.WithInsecure())
+	if err != nil {
+		log.Error(err)
+		return &pb.Metadata{}, err
+	}
+	defer con.Close()
+
+	log.Infof("created connection to prop")
+
+	client := proppb.NewPropClient(con)
+
+	in := &proppb.GetReq{}
+	in.Path = p
+	in.AccessToken = req.AccessToken
+
+	rec, err := client.Get(ctx, in)
+	if err != nil {
+		//TODO(labkode) if record not found create it. Take closer look to home creation
+		log.Error(err)
+		return &pb.Metadata{}, err
+	}
+
+	parentMeta.Id = rec.Id
+	parentMeta.Etag = rec.Etag
+	parentMeta.Modified = rec.Modified
+	parentMeta.Checksum = rec.Checksum
+
 	if !parentMeta.IsContainer || req.Children == false {
 		return parentMeta, nil
 	}
@@ -177,14 +248,30 @@ func (s *server) Stat(ctx context.Context, req *pb.StatReq) (*pb.Metadata, error
 	log.Infof("dir %s has %d entries", pp, len(names))
 
 	for _, n := range names {
-		cpp := s.getPhysicalPath(path.Join(parentMeta.Path, path.Clean(n)))
+		cp := path.Join(parentMeta.Path, path.Clean(n))
+		cpp := s.getPhysicalPath(cp)
 		m, err := s.getMeta(cpp)
 		if err != nil {
 			log.Error(err)
 		} else {
-			parentMeta.Children = append(parentMeta.Children, m)
-		}
+			in := &proppb.GetReq{}
+			in.Path = cp
+			in.AccessToken = req.AccessToken
 
+			rec, err := client.Get(ctx, in)
+			if err != nil {
+				log.Errorf("path %s has not been added because %s", p, err.Error())
+				// ommit this record but not cancell the whole operation
+			} else {
+				m.Id = rec.Id
+				m.Etag = rec.Etag
+				m.Modified = rec.Modified
+				m.Checksum = rec.Checksum
+				parentMeta.Children = append(parentMeta.Children, m)
+
+				log.Infof("added %s to parent", m.Path)
+			}
+		}
 	}
 
 	log.Infof("added %d entries to parent", len(parentMeta.Children))
@@ -195,7 +282,7 @@ func (s *server) Stat(ctx context.Context, req *pb.StatReq) (*pb.Metadata, error
 // TODO(labkode) ask service.localstore.prop to update metadata of new resources
 func (s *server) Cp(ctx context.Context, req *pb.CpReq) (*pb.Void, error) {
 
-	idt, err := lib.ParseToken(req.AccessToken, s.p.sharedSecret)
+	idt, err := authlib.ParseToken(req.AccessToken, s.p.sharedSecret)
 	if err != nil {
 		log.Error(err)
 		return &pb.Void{}, unauthenticatedError
@@ -263,7 +350,7 @@ func (s *server) Cp(ctx context.Context, req *pb.CpReq) (*pb.Void, error) {
 // TODO(labkode) ask service.localstore.prop to mv metadata.
 func (s *server) Mv(ctx context.Context, req *pb.MvReq) (*pb.Void, error) {
 
-	idt, err := lib.ParseToken(req.AccessToken, s.p.sharedSecret)
+	idt, err := authlib.ParseToken(req.AccessToken, s.p.sharedSecret)
 	if err != nil {
 		log.Error(err)
 		return &pb.Void{}, unauthenticatedError
@@ -311,7 +398,7 @@ func (s *server) Mv(ctx context.Context, req *pb.MvReq) (*pb.Void, error) {
 // TODO(labkode) ask service.localstore.prop to remove
 func (s *server) Rm(ctx context.Context, req *pb.RmReq) (*pb.Void, error) {
 
-	idt, err := lib.ParseToken(req.AccessToken, s.p.sharedSecret)
+	idt, err := authlib.ParseToken(req.AccessToken, s.p.sharedSecret)
 	if err != nil {
 		log.Error(err)
 		return &pb.Void{}, unauthenticatedError
@@ -360,12 +447,9 @@ func (s *server) getMeta(pp string) (*pb.Metadata, error) {
 	logicalPath := s.getLogicalPath(pp)
 
 	m := &pb.Metadata{}
-	m.Id = "TODO"
 	m.Path = logicalPath
 	m.Size = uint32(finfo.Size())
 	m.IsContainer = finfo.IsDir()
-	m.Modified = uint32(finfo.ModTime().Unix())
-	m.Etag = "TODO"
 	m.Permissions = 0
 	m.MimeType = mime.TypeByExtension(path.Ext(m.Path))
 
