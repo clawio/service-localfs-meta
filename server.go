@@ -55,6 +55,17 @@ func (s *server) Home(ctx context.Context, req *pb.HomeReq) (*pb.Void, error) {
 
 	log.Infof("physical path is %s", pp)
 
+	con, err := grpc.Dial(s.p.prop, grpc.WithInsecure())
+	if err != nil {
+		log.Error(err)
+		return &pb.Void{}, err
+	}
+	defer con.Close()
+
+	log.Infof("created connection to prop")
+
+	client := proppb.NewPropClient(con)
+
 	_, err = os.Stat(pp)
 
 	// Create home dir if not exists
@@ -68,7 +79,19 @@ func (s *server) Home(ctx context.Context, req *pb.HomeReq) (*pb.Void, error) {
 			return &pb.Void{}, err
 		}
 
-		log.Infof("home created")
+		log.Infof("home created at %s", pp)
+
+		in := &proppb.GetReq{}
+		in.Path = home
+		in.AccessToken = req.AccessToken
+		in.ForceCreation = true
+
+		_, err = client.Get(ctx, in)
+		if err != nil {
+			return &pb.Void{}, nil
+		}
+
+		log.Info("home putted into prop")
 
 		return &pb.Void{}, nil
 	}
@@ -78,30 +101,19 @@ func (s *server) Home(ctx context.Context, req *pb.HomeReq) (*pb.Void, error) {
 		return &pb.Void{}, err
 	}
 
-	log.Infof("home already created")
+	log.Infof("home at %s already created")
 
-	con, err := grpc.Dial(s.p.prop, grpc.WithInsecure())
-	if err != nil {
-		log.Error(err)
-		return &pb.Void{}, err
-	}
-	defer con.Close()
-
-	log.Infof("created connection to prop")
-
-	client := proppb.NewPropClient(con)
-
-	in := &proppb.PutReq{}
+	in := &proppb.GetReq{}
 	in.Path = home
 	in.AccessToken = req.AccessToken
+	in.ForceCreation = true
 
-	_, err = client.Put(ctx, in)
+	_, err = client.Get(ctx, in)
 	if err != nil {
-		log.Error(err)
-		return &pb.Void{}, err
+		return &pb.Void{}, nil
 	}
 
-	log.Infof("home added to prop")
+	log.Infof("home is in prop")
 
 	return &pb.Void{}, nil
 }
