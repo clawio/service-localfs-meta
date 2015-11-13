@@ -8,7 +8,11 @@
 		},
 		{
 			"ImportPath": "github.com/clawio/service.auth/lib",
-			"Rev": "59b2672ba44edebdc97f2a55f56d716d7c8ea33b"
+			"Rev": "46b88e0873a87da680ff30911274f657d2f232e2"
+		},
+		{
+			"ImportPath": "github.com/clawio/service.localstore.prop/proto",
+			"Rev": "4453a648849b8c53b6deb26a00563263cfa5ce6a"
 		},
 		{
 			"ImportPath": "github.com/dgrijalva/jwt-go",
