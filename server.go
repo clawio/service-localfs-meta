@@ -376,7 +376,7 @@ func (s *server) Mv(ctx context.Context, req *pb.MvReq) (*pb.Void, error) {
 	log.Infof("src is %s", src)
 	log.Info("dst is %s", dst)
 
-	if isUnderHome(src, idt) {
+	if !isUnderHome(src, idt) {
 		log.Error(permissionDenied)
 		return &pb.Void{}, permissionDenied
 	}
