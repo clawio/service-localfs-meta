@@ -434,7 +434,7 @@ func (s *server) Rm(ctx context.Context, req *pb.RmReq) (*pb.Void, error) {
 
 	log.Infof("physical path is %s", pp)
 
-	err = os.Remove(pp)
+	err = os.RemoveAll(pp)
 	if err != nil {
 		log.Error(err)
 		return &pb.Void{}, err
