@@ -404,6 +404,30 @@ func (s *server) Mv(ctx context.Context, req *pb.MvReq) (*pb.Void, error) {
 
 	log.Infof("renamed from %s to %s", psrc, pdst)
 
+	con, err := grpc.Dial(s.p.prop, grpc.WithInsecure())
+	if err != nil {
+		log.Error(err)
+		return &pb.Void{}, err
+	}
+	defer con.Close()
+
+	log.Infof("created connection to prop")
+
+	client := proppb.NewPropClient(con)
+
+	in := &proppb.MvReq{}
+	in.Src = src
+	in.Dst = dst
+	in.AccessToken = req.AccessToken
+
+	_, err = client.Mv(ctx, in)
+	if err != nil {
+		log.Error(err)
+		return &pb.Void{}, err
+	}
+
+	log.Infof("renamed %s to %s in prop", src, dst)
+
 	return &pb.Void{}, nil
 }
 
