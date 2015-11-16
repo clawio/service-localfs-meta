@@ -12,7 +12,7 @@
 		},
 		{
 			"ImportPath": "github.com/clawio/service.localstore.prop/proto",
-			"Rev": "369cac914209a79031d02654b5d1541471679eb1"
+			"Rev": "28d84e8739d6a8079e2a979d70d0c94d5906f330"
 		},
 		{
 			"ImportPath": "github.com/dgrijalva/jwt-go",
