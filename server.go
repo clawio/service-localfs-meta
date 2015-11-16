@@ -407,7 +407,6 @@ func (s *server) Mv(ctx context.Context, req *pb.MvReq) (*pb.Void, error) {
 	return &pb.Void{}, nil
 }
 
-// TODO(labkode) ask service.localstore.prop to remove
 func (s *server) Rm(ctx context.Context, req *pb.RmReq) (*pb.Void, error) {
 
 	idt, err := authlib.ParseToken(req.AccessToken, s.p.sharedSecret)
@@ -442,6 +441,29 @@ func (s *server) Rm(ctx context.Context, req *pb.RmReq) (*pb.Void, error) {
 	}
 
 	log.Infof("removed %s", pp)
+
+	con, err := grpc.Dial(s.p.prop, grpc.WithInsecure())
+	if err != nil {
+		log.Error(err)
+		return &pb.Void{}, err
+	}
+	defer con.Close()
+
+	log.Infof("created connection to prop")
+
+	client := proppb.NewPropClient(con)
+
+	in := &proppb.RmReq{}
+	in.Path = p
+	in.AccessToken = req.AccessToken
+
+	_, err = client.Rm(ctx, in)
+	if err != nil {
+		log.Error(err)
+		return &pb.Void{}, err
+	}
+
+	log.Infof("paths with prefix %s removed from prop", p)
 
 	return &pb.Void{}, nil
 }
