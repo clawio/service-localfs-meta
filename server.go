@@ -291,7 +291,6 @@ func (s *server) Stat(ctx context.Context, req *pb.StatReq) (*pb.Metadata, error
 	return parentMeta, nil
 }
 
-// TODO(labkode) ask service.localstore.prop to update metadata of new resources
 func (s *server) Cp(ctx context.Context, req *pb.CpReq) (*pb.Void, error) {
 
 	idt, err := authlib.ParseToken(req.AccessToken, s.p.sharedSecret)
@@ -343,23 +342,48 @@ func (s *server) Cp(ctx context.Context, req *pb.CpReq) (*pb.Void, error) {
 	if meta.IsContainer {
 		err = copyDir(psrc, pdst)
 		if err != nil {
+			log.Error(err)
 			return &pb.Void{}, err
 		}
 
 		log.Infof("copied from dir %s to dir %s", psrc, pdst)
+	} else {
+		// It is a file
+		err = copyFile(psrc, pdst, int64(meta.Size))
+		if err != nil {
+			log.Error(err)
+			return &pb.Void{}, err
+		}
+
+		log.Infof("copied from file %s to file %s", psrc, pdst)
 	}
 
-	err = copyFile(psrc, pdst, int64(meta.Size))
+	con, err := grpc.Dial(s.p.prop, grpc.WithInsecure())
 	if err != nil {
+		log.Error(err)
+		return &pb.Void{}, err
+	}
+	defer con.Close()
+
+	log.Infof("created connection to prop")
+
+	client := proppb.NewPropClient(con)
+
+	in := &proppb.PutReq{}
+	in.Path = dst
+	in.AccessToken = req.AccessToken
+
+	_, err = client.Put(ctx, in)
+	if err != nil {
+		log.Error(err)
 		return &pb.Void{}, err
 	}
 
-	log.Infof("copied from file %s to file %s", psrc, pdst)
+	log.Infof("copied resource %s saved in prop")
 
 	return &pb.Void{}, nil
 }
 
-// TODO(labkode) ask service.localstore.prop to mv metadata.
 func (s *server) Mv(ctx context.Context, req *pb.MvReq) (*pb.Void, error) {
 
 	idt, err := authlib.ParseToken(req.AccessToken, s.p.sharedSecret)
@@ -493,8 +517,6 @@ func (s *server) Rm(ctx context.Context, req *pb.RmReq) (*pb.Void, error) {
 }
 
 // getMeta return the metadata of path pp.
-// p is the physical path and should never be exposed to clients.
-// TODO(labkode) ask service.localstore.prop for id, mtime and etag.
 func (s *server) getMeta(pp string) (*pb.Metadata, error) {
 
 	finfo, err := os.Stat(pp)
