@@ -2,7 +2,7 @@ package main
 
 import (
 	authlib "github.com/clawio/service.auth/lib"
-	pb "github.com/clawio/service.localstore.meta/proto"
+	pb "github.com/clawio/service.localstore.meta/proto/metadata"
 	proppb "github.com/clawio/service.localstore.prop/proto"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"

@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/clawio/grpcxlog"
-	pb "github.com/clawio/service.localstore.meta/proto"
+	pb "github.com/clawio/service.localstore.meta/proto/metadata"
 	"github.com/rs/xlog"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/grpclog"
@@ -103,6 +103,6 @@ func main() {
 	}
 
 	grpcServer := grpc.NewServer()
-	pb.RegisterLocalServer(grpcServer, srv)
+	pb.RegisterMetaServer(grpcServer, srv)
 	grpcServer.Serve(lis)
 }
