@@ -3,8 +3,9 @@
 	"GoVersion": "go1.5",
 	"Deps": [
 		{
-			"ImportPath": "github.com/clawio/grpcxlog",
-			"Rev": "ee1c038e752176ccc2cad7e53a42acc7f8a346a0"
+			"ImportPath": "code.google.com/p/go-uuid/uuid",
+			"Comment": "null-15",
+			"Rev": "35bc42037350f0078e3c974c6ea690f1926603ab"
 		},
 		{
 			"ImportPath": "github.com/clawio/service.auth/lib",
@@ -20,12 +21,9 @@
 			"Rev": "5baca1b63153b1a82014546382edbdd302b138b6"
 		},
 		{
-			"ImportPath": "github.com/rs/xhandler",
-			"Rev": "8431b30f293907f6613667c03df1f089e0fb8741"
-		},
-		{
-			"ImportPath": "github.com/rs/xlog",
-			"Rev": "8c68485b36cc494d36e9d77a02bcd7df12848ac8"
+			"ImportPath": "github.com/sirupsen/logrus",
+			"Comment": "v0.8.6-13-g84b968c",
+			"Rev": "84b968cb9f82d727044973f8255489bbe15e9948"
 		},
 		{
 			"ImportPath": "golang.org/x/net/context",
