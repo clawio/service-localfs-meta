@@ -206,10 +206,32 @@ func (s *server) Stat(ctx context.Context, req *pb.StatReq) (*pb.Metadata, error
 
 	log.Infof("path is %s", p)
 
-	if !isUnderHome(p, idt) {
-		log.Error(permissionDenied)
-		return &pb.Metadata{}, permissionDenied
+	// The hierarchy is /local/users/d/demo
+	// All paths in the hierarchy above the user home directory must be
+	// accessible for all logged in users
+	if isCommonDomain(p) {
+
+	} else { // it must be under /local/users/{letter}
+		if isUnderOtherHome(p, idt) {
+			if req.Children == true {
+				// TODO(labkode) Sharing
+				return &pb.Metadata{}, permissionDenied
+			}
+		} else {
+			// asset is under logged in user home directory
+			if !isUnderHome(p, idt) {
+				log.WithField("criticial", "").Errorf("path %s has not been handled correclty or fake path", p)
+				return &pb.Metadata{}, permissionDenied
+			}
+		}
 	}
+
+	/*
+		if !isUnderHome(p, idt) { // constrained to /local/users/d/demo/...
+			log.Error(permissionDenied)
+			return &pb.Metadata{}, permissionDenied
+		}
+	*/
 
 	pp := s.getPhysicalPath(p)
 

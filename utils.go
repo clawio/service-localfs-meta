@@ -38,6 +38,36 @@ func isUnderHome(p string, idt *lib.Identity) bool {
 
 	return false
 }
+func isUnderOtherHome(p string, idt *lib.Identity) bool {
+	home := getHome(idt)
+	homeTokens := strings.Split(home, "/")
+
+	tokens := strings.Split(p, "/")
+
+	// /local/users/d/labrador/myfiles
+	if len(tokens) < 5 { // not a home dir
+		return false
+	}
+	if tokens[3] == homeTokens[3] && tokens[4] == homeTokens[4] {
+		return false // same user home
+	}
+
+	return true
+}
+
+// isCommonDomain checks if the path is the common domain
+// i.e /local/users/{letter}
+func isCommonDomain(p string) bool {
+	p = path.Clean(p)
+	tokens := strings.Split(p, "/")
+
+	if len(tokens) > 4 {
+		// is a home dir or an fake dir
+		return false
+	}
+
+	return true
+}
 
 // copyFile copies a file from src to dst.
 // src and dst are physycal paths.
