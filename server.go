@@ -4,7 +4,7 @@ import (
 	authlib "github.com/clawio/service.auth/lib"
 	pb "github.com/clawio/service.localstore.meta/proto/metadata"
 	proppb "github.com/clawio/service.localstore.meta/proto/propagator"
-	log "github.com/sirupsen/logrus"
+	rus "github.com/sirupsen/logrus"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -12,6 +12,7 @@ import (
 	"os"
 	"path"
 	"strings"
+	"time"
 )
 
 const (
@@ -41,8 +42,26 @@ type server struct {
 func (s *server) Home(ctx context.Context, req *pb.HomeReq) (*pb.Void, error) {
 
 	traceID := getTraceID(ctx)
-	log := log.WithField("trace", traceID)
+	log := rus.WithField("trace", traceID).WithField("svc", serviceID)
 	ctx = newTraceContext(ctx, traceID)
+
+	log.Info("request started")
+
+	// Time request
+	reqStart := time.Now()
+
+	defer func() {
+		// Compute request duration
+		reqDur := time.Since(reqStart)
+
+		// Log access info
+		log.WithFields(rus.Fields{
+			"method":   "home",
+			"type":     "grpcaccess",
+			"duration": reqDur.Seconds(),
+		}).Info("request finished")
+
+	}()
 
 	idt, err := authlib.ParseToken(req.AccessToken, s.p.sharedSecret)
 	if err != nil {
@@ -126,8 +145,26 @@ func (s *server) Home(ctx context.Context, req *pb.HomeReq) (*pb.Void, error) {
 func (s *server) Mkdir(ctx context.Context, req *pb.MkdirReq) (*pb.Void, error) {
 
 	traceID := getTraceID(ctx)
-	log := log.WithField("trace", traceID)
+	log := rus.WithField("trace", traceID).WithField("svc", serviceID)
 	ctx = newTraceContext(ctx, traceID)
+
+	log.Info("request started")
+
+	// Time request
+	reqStart := time.Now()
+
+	defer func() {
+		// Compute request duration
+		reqDur := time.Since(reqStart)
+
+		// Log access info
+		log.WithFields(rus.Fields{
+			"method":   "mkdir",
+			"type":     "grpcaccess",
+			"duration": reqDur.Seconds(),
+		}).Info("request finished")
+
+	}()
 
 	idt, err := authlib.ParseToken(req.AccessToken, s.p.sharedSecret)
 	if err != nil {
@@ -191,8 +228,26 @@ func (s *server) Mkdir(ctx context.Context, req *pb.MkdirReq) (*pb.Void, error) 
 func (s *server) Stat(ctx context.Context, req *pb.StatReq) (*pb.Metadata, error) {
 
 	traceID := getTraceID(ctx)
-	log := log.WithField("trace", traceID)
+	log := rus.WithField("trace", traceID).WithField("svc", serviceID)
 	ctx = newTraceContext(ctx, traceID)
+
+	log.Info("request started")
+
+	// Time request
+	reqStart := time.Now()
+
+	defer func() {
+		// Compute request duration
+		reqDur := time.Since(reqStart)
+
+		// Log access info
+		log.WithFields(rus.Fields{
+			"method":   "stat",
+			"type":     "grpcaccess",
+			"duration": reqDur.Seconds(),
+		}).Info("request finished")
+
+	}()
 
 	idt, err := authlib.ParseToken(req.AccessToken, s.p.sharedSecret)
 	if err != nil {
@@ -329,8 +384,27 @@ func (s *server) Stat(ctx context.Context, req *pb.StatReq) (*pb.Metadata, error
 func (s *server) Cp(ctx context.Context, req *pb.CpReq) (*pb.Void, error) {
 
 	traceID := getTraceID(ctx)
-	log := log.WithField("trace", traceID)
+	log := rus.WithField("trace", traceID).WithField("svc", serviceID)
 	ctx = newTraceContext(ctx, traceID)
+
+	log.Info("request started")
+
+	// Time request
+	reqStart := time.Now()
+
+	defer func() {
+		// Compute request duration
+		reqDur := time.Since(reqStart)
+
+		// Log access info
+		log.WithFields(rus.Fields{
+			"method":   "cp",
+			"type":     "grpcaccess",
+			"duration": reqDur.Seconds(),
+		}).Info("request finished")
+
+	}()
+
 	idt, err := authlib.ParseToken(req.AccessToken, s.p.sharedSecret)
 
 	if err != nil {
@@ -404,7 +478,7 @@ func (s *server) Cp(ctx context.Context, req *pb.CpReq) (*pb.Void, error) {
 	}
 	defer con.Close()
 
-	log.Infof("created connection to prop")
+	log.Infof("created connection to %s", s.p.prop)
 
 	client := proppb.NewPropClient(con)
 
@@ -426,8 +500,26 @@ func (s *server) Cp(ctx context.Context, req *pb.CpReq) (*pb.Void, error) {
 func (s *server) Mv(ctx context.Context, req *pb.MvReq) (*pb.Void, error) {
 
 	traceID := getTraceID(ctx)
-	log := log.WithField("trace", traceID)
+	log := rus.WithField("trace", traceID).WithField("svc", serviceID)
 	ctx = newTraceContext(ctx, traceID)
+
+	log.Info("request started")
+
+	// Time request
+	reqStart := time.Now()
+
+	defer func() {
+		// Compute request duration
+		reqDur := time.Since(reqStart)
+
+		// Log access info
+		log.WithFields(rus.Fields{
+			"method":   "mv",
+			"type":     "grpcaccess",
+			"duration": reqDur.Seconds(),
+		}).Info("request finished")
+
+	}()
 
 	idt, err := authlib.ParseToken(req.AccessToken, s.p.sharedSecret)
 	if err != nil {
@@ -501,8 +593,26 @@ func (s *server) Mv(ctx context.Context, req *pb.MvReq) (*pb.Void, error) {
 func (s *server) Rm(ctx context.Context, req *pb.RmReq) (*pb.Void, error) {
 
 	traceID := getTraceID(ctx)
-	log := log.WithField("trace", traceID)
+	log := rus.WithField("trace", traceID).WithField("svc", serviceID)
 	ctx = newTraceContext(ctx, traceID)
+
+	log.Info("request started")
+
+	// Time request
+	reqStart := time.Now()
+
+	defer func() {
+		// Compute request duration
+		reqDur := time.Since(reqStart)
+
+		// Log access info
+		log.WithFields(rus.Fields{
+			"method":   "rm",
+			"type":     "grpcaccess",
+			"duration": reqDur.Seconds(),
+		}).Info("request finished")
+
+	}()
 
 	idt, err := authlib.ParseToken(req.AccessToken, s.p.sharedSecret)
 	if err != nil {
