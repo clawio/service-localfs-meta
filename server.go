@@ -1,9 +1,9 @@
 package main
 
 import (
+	pb "github.com/clawio/service-localfs-meta/proto/metadata"
+	proppb "github.com/clawio/service-localfs-meta/proto/propagator"
 	authlib "github.com/clawio/service.auth/lib"
-	pb "github.com/clawio/service.localstore.meta/proto/metadata"
-	proppb "github.com/clawio/service.localstore.meta/proto/propagator"
 	rus "github.com/sirupsen/logrus"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
