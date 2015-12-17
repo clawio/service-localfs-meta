@@ -1,9 +1,9 @@
 package main
 
 import (
+	authlib "github.com/clawio/service-auth/lib"
 	pb "github.com/clawio/service-localfs-meta/proto/metadata"
 	proppb "github.com/clawio/service-localfs-meta/proto/propagator"
-	authlib "github.com/clawio/service.auth/lib"
 	rus "github.com/sirupsen/logrus"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
@@ -73,11 +73,11 @@ func (s *server) Home(ctx context.Context, req *pb.HomeReq) (*pb.Void, error) {
 
 	home := getHome(idt)
 
-	log.Infof("home is %s", home)
+	log.Infof("user home is %s", home)
 
 	pp := s.getPhysicalPath(home)
 
-	log.Infof("physical path is %s", pp)
+	log.Infof("user physical home is %s", pp)
 
 	con, err := grpc.Dial(s.p.prop, grpc.WithInsecure())
 	if err != nil {
@@ -86,7 +86,7 @@ func (s *server) Home(ctx context.Context, req *pb.HomeReq) (*pb.Void, error) {
 	}
 	defer con.Close()
 
-	log.Infof("created connection to prop")
+	log.Infof("created connection to %s", s.p.prop)
 
 	client := proppb.NewPropClient(con)
 
@@ -95,7 +95,7 @@ func (s *server) Home(ctx context.Context, req *pb.HomeReq) (*pb.Void, error) {
 	// Create home dir if not exists
 	if os.IsNotExist(err) {
 
-		log.Infof("home does not exist")
+		log.Infof("user physical home %s does not exist", pp)
 
 		err = os.MkdirAll(pp, dirPerm)
 		if err != nil {
@@ -103,7 +103,7 @@ func (s *server) Home(ctx context.Context, req *pb.HomeReq) (*pb.Void, error) {
 			return &pb.Void{}, err
 		}
 
-		log.Infof("home created at %s", pp)
+		log.Infof("user physical home created at %s", pp)
 
 		in := &proppb.GetReq{}
 		in.Path = home
@@ -115,7 +115,7 @@ func (s *server) Home(ctx context.Context, req *pb.HomeReq) (*pb.Void, error) {
 			return &pb.Void{}, nil
 		}
 
-		log.Info("home putted into prop")
+		log.Info("home saved to %s", s.p.prop)
 
 		return &pb.Void{}, nil
 	}
@@ -125,7 +125,7 @@ func (s *server) Home(ctx context.Context, req *pb.HomeReq) (*pb.Void, error) {
 		return &pb.Void{}, err
 	}
 
-	log.Infof("home at %s already created")
+	log.Infof("user physical home at %s already created")
 
 	in := &proppb.GetReq{}
 	in.Path = home
@@ -136,8 +136,6 @@ func (s *server) Home(ctx context.Context, req *pb.HomeReq) (*pb.Void, error) {
 	if err != nil {
 		return &pb.Void{}, nil
 	}
-
-	log.Infof("home is in prop")
 
 	return &pb.Void{}, nil
 }
