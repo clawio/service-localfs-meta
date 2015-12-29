@@ -1,24 +1,31 @@
 {
 	"ImportPath": "github.com/clawio/service-localfs-meta",
 	"GoVersion": "go1.5",
+	"Packages": [
+		"./..."
+	],
 	"Deps": [
-		{
-			"ImportPath": "code.google.com/p/go-uuid/uuid",
-			"Comment": "null-15",
-			"Rev": "35bc42037350f0078e3c974c6ea690f1926603ab"
-		},
-		{
-			"ImportPath": "github.com/clawio/service-auth/lib",
-			"Rev": "37f9431977a2d19a02605bee3731973d893aa630"
-		},
 		{
 			"ImportPath": "github.com/dgrijalva/jwt-go",
 			"Comment": "v2.4.0",
 			"Rev": "f164e17f59b82642a3895ba065c385db6c547344"
 		},
 		{
+			"ImportPath": "code.google.com/p/go-uuid/uuid",
+			"Comment": "null-15",
+			"Rev": "'35bc42037350f0078e3c974c6ea690f1926603ab'"
+		},
+		{
+			"ImportPath": "github.com/clawio/service-auth/lib",
+			"Rev": "58ade3f9633b2baef6a2ad9390e17344ab6e9fce"
+		},
+		{
+			"ImportPath": "github.com/dropbox/godropbox/resource_pool",
+			"Rev": "3c8a9189a8748951b62c6a48c072448b2fd4cac7"
+		},
+		{
 			"ImportPath": "github.com/golang/protobuf/proto",
-			"Rev": "5baca1b63153b1a82014546382edbdd302b138b6"
+			"Rev": "68415e7123da32b07eab49c96d2c4d6158360e9b"
 		},
 		{
 			"ImportPath": "github.com/sirupsen/logrus",
@@ -27,15 +34,11 @@
 		},
 		{
 			"ImportPath": "golang.org/x/net/context",
-			"Rev": "b4e17d61b15679caf2335da776c614169a1b4643"
-		},
-		{
-			"ImportPath": "golang.org/x/net/trace",
-			"Rev": "b4e17d61b15679caf2335da776c614169a1b4643"
+			"Rev": "5d0a0f8cd486626821d2ba44d471ab1c9271d38f"
 		},
 		{
 			"ImportPath": "google.golang.org/grpc",
-			"Rev": "1f1a4999ca75ba4fd6d5c91233383a170034a1a5"
+			"Rev": "78905999da08d7f87d5dd11608fa79ff8700daa8"
 		}
 	]
 }
