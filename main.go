@@ -17,6 +17,7 @@ const (
 	tmpDirEnvar             = serviceID + "_TMPDIR"
 	portEnvar               = serviceID + "_PORT"
 	propEnvar               = serviceID + "_PROP"
+	logLevelEnvar           = serviceID + "_LOGLEVEL"
 	propMaxActiveEnvar      = serviceID + "_PROPMAXACTIVE"
 	propMaxIdleEnvar        = serviceID + "_PROPMAXIDLE"
 	propMaxConcurrencyEnvar = serviceID + "_PROPMAXCONCURRENCY"
@@ -28,6 +29,7 @@ type environ struct {
 	tmpDir             string
 	port               int
 	prop               string
+	logLevel           string
 	propMaxActive      int
 	propMaxIdle        int
 	propMaxConcurrency int
@@ -45,6 +47,7 @@ func getEnviron() (*environ, error) {
 	e.port = port
 
 	e.prop = os.Getenv(propEnvar)
+	e.logLevel = os.Getenv(logLevelEnvar)
 
 	propMaxActive, err := strconv.Atoi(os.Getenv(propMaxActiveEnvar))
 	if err != nil {
@@ -68,19 +71,18 @@ func getEnviron() (*environ, error) {
 	return e, nil
 }
 func printEnviron(e *environ) {
-	log.Infof("%s=%s", dataDirEnvar, e.dataDir)
-	log.Infof("%s=%s", tmpDirEnvar, e.tmpDir)
-	log.Infof("%s=%d", portEnvar, e.port)
-	log.Infof("%s=%s", propEnvar, e.prop)
-	log.Infof("%s=%d", propMaxActiveEnvar, e.propMaxActive)
-	log.Infof("%s=%d", propMaxIdleEnvar, e.propMaxIdle)
-	log.Infof("%s=%d", propMaxConcurrencyEnvar, e.propMaxConcurrency)
-	log.Infof("%s=%s", sharedSecretEnvar, "******")
+	log.Infof("%s=%s\n", dataDirEnvar, e.dataDir)
+	log.Infof("%s=%s\n", tmpDirEnvar, e.tmpDir)
+	log.Infof("%s=%d\n", portEnvar, e.port)
+	log.Infof("%s=%s\n", propEnvar, e.prop)
+	log.Infof("%s=%d\n", propMaxActiveEnvar, e.propMaxActive)
+	log.Infof("%s=%d\n", propMaxIdleEnvar, e.propMaxIdle)
+	log.Infof("%s=%d\n", propMaxConcurrencyEnvar, e.propMaxConcurrency)
+	log.Infof("%s=%s\n", sharedSecretEnvar, "******")
 }
 
 func main() {
 	runtime.GOMAXPROCS(runtime.NumCPU())
-	log.Infof("Service %s started", serviceID)
 
 	env, err := getEnviron()
 	if err != nil {
@@ -98,6 +100,15 @@ func main() {
 	p.propMaxActive = env.propMaxActive
 	p.propMaxIdle = env.propMaxIdle
 	p.propMaxConcurrency = env.propMaxConcurrency
+
+	l, err := log.ParseLevel(env.logLevel)
+	if err != nil {
+		l = log.ErrorLevel
+	}
+	log.SetLevel(l)
+
+	log.Infof("Service %s started", serviceID)
+	printEnviron(env)
 
 	// Create data and tmp dirs
 	if err := os.MkdirAll(p.dataDir, 0644); err != nil {

@@ -78,7 +78,11 @@ type server struct {
 
 func (s *server) Home(ctx context.Context, req *pb.HomeReq) (*pb.Void, error) {
 
-	traceID := getTraceID(ctx)
+	traceID, err := getTraceID(ctx)
+	if err != nil {
+		rus.Error(err)
+		return &pb.Void{}, err
+	}
 	log := rus.WithField("trace", traceID).WithField("svc", serviceID)
 	ctx = newTraceContext(ctx, traceID)
 
@@ -186,7 +190,11 @@ func (s *server) Home(ctx context.Context, req *pb.HomeReq) (*pb.Void, error) {
 
 func (s *server) Mkdir(ctx context.Context, req *pb.MkdirReq) (*pb.Void, error) {
 
-	traceID := getTraceID(ctx)
+	traceID, err := getTraceID(ctx)
+	if err != nil {
+		rus.Error(err)
+		return &pb.Void{}, err
+	}
 	log := rus.WithField("trace", traceID).WithField("svc", serviceID)
 	ctx = newTraceContext(ctx, traceID)
 
@@ -276,7 +284,11 @@ func (s *server) Mkdir(ctx context.Context, req *pb.MkdirReq) (*pb.Void, error) 
 
 func (s *server) Stat(ctx context.Context, req *pb.StatReq) (*pb.Metadata, error) {
 
-	traceID := getTraceID(ctx)
+	traceID, err := getTraceID(ctx)
+	if err != nil {
+		rus.Error(err)
+		return &pb.Metadata{}, err
+	}
 	log := rus.WithField("trace", traceID).WithField("svc", serviceID)
 	ctx = newTraceContext(ctx, traceID)
 
@@ -439,7 +451,11 @@ func (s *server) Stat(ctx context.Context, req *pb.StatReq) (*pb.Metadata, error
 
 func (s *server) Cp(ctx context.Context, req *pb.CpReq) (*pb.Void, error) {
 
-	traceID := getTraceID(ctx)
+	traceID, err := getTraceID(ctx)
+	if err != nil {
+		rus.Error(err)
+		return &pb.Void{}, err
+	}
 	log := rus.WithField("trace", traceID).WithField("svc", serviceID)
 	ctx = newTraceContext(ctx, traceID)
 
@@ -562,7 +578,11 @@ func (s *server) Cp(ctx context.Context, req *pb.CpReq) (*pb.Void, error) {
 
 func (s *server) Mv(ctx context.Context, req *pb.MvReq) (*pb.Void, error) {
 
-	traceID := getTraceID(ctx)
+	traceID, err := getTraceID(ctx)
+	if err != nil {
+		rus.Error(err)
+		return &pb.Void{}, err
+	}
 	log := rus.WithField("trace", traceID).WithField("svc", serviceID)
 	ctx = newTraceContext(ctx, traceID)
 
@@ -662,7 +682,11 @@ func (s *server) Mv(ctx context.Context, req *pb.MvReq) (*pb.Void, error) {
 
 func (s *server) Rm(ctx context.Context, req *pb.RmReq) (*pb.Void, error) {
 
-	traceID := getTraceID(ctx)
+	traceID, err := getTraceID(ctx)
+	if err != nil {
+		rus.Error(err)
+		return &pb.Void{}, err
+	}
 	log := rus.WithField("trace", traceID).WithField("svc", serviceID)
 	ctx = newTraceContext(ctx, traceID)
 

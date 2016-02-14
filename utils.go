@@ -1,8 +1,8 @@
 package main
 
 import (
-	"code.google.com/p/go-uuid/uuid"
 	"github.com/clawio/service-auth/lib"
+	"github.com/nu7hatch/gouuid"
 	"golang.org/x/net/context"
 	metadata "google.golang.org/grpc/metadata"
 	"io"
@@ -136,21 +136,34 @@ func newTraceContext(ctx context.Context, trace string) context.Context {
 	return ctx
 }
 
-func getTraceID(ctx context.Context) string {
+func getTraceID(ctx context.Context) (string, error) {
 
 	md, ok := metadata.FromContext(ctx)
 	if !ok {
-		return uuid.New()
+		u, err := uuid.NewV4()
+		if err != nil {
+			return "", err
+		}
+		return u.String(), nil
 	}
 
 	tokens := md["trace"]
 	if len(tokens) == 0 {
-		return uuid.New()
+		u, err := uuid.NewV4()
+		if err != nil {
+			return "", err
+		}
+		return u.String(), nil
 	}
 
 	if tokens[0] != "" {
-		return tokens[0]
+		return tokens[0], nil
 	}
 
-	return uuid.New()
+	u, err := uuid.NewV4()
+	if err != nil {
+		return "", err
+	}
+	return u.String(), nil
+
 }
