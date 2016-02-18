@@ -90,7 +90,11 @@ func main() {
 		os.Exit(1)
 	}
 
-	printEnviron(env)
+	l, err := log.ParseLevel(env.logLevel)
+	if err != nil {
+		l = log.ErrorLevel
+	}
+	log.SetLevel(l)
 
 	p := &newServerParams{}
 	p.dataDir = env.dataDir
@@ -100,12 +104,6 @@ func main() {
 	p.propMaxActive = env.propMaxActive
 	p.propMaxIdle = env.propMaxIdle
 	p.propMaxConcurrency = env.propMaxConcurrency
-
-	l, err := log.ParseLevel(env.logLevel)
-	if err != nil {
-		l = log.ErrorLevel
-	}
-	log.SetLevel(l)
 
 	log.Infof("Service %s started", serviceID)
 	printEnviron(env)
